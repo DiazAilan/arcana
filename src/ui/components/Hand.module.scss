@@ -1,0 +1,21 @@
+.hand {
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+  padding: 1rem 0 0.5rem;
+  position: relative;
+}
+
+.slot {
+  transform: rotate(calc((var(--i) - 2) * 3deg));
+}
+
+.hint {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  font-size: 0.75rem;
+  color: rgba(255, 255, 255, 0.35);
+}

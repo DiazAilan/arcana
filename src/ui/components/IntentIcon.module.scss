@@ -1,0 +1,29 @@
+@use '../../styles/variables' as *;
+
+.intent {
+  min-width: 36px;
+  padding: 0.25rem 0.45rem;
+  border-radius: $radius-sm;
+  font-size: 0.85rem;
+  font-weight: 700;
+  text-align: center;
+  border: 1px solid $border-subtle;
+}
+
+.attack {
+  background: rgba($accent-danger, 0.25);
+  color: lighten($accent-danger, 10%);
+}
+
+.block {
+  background: rgba(100, 160, 255, 0.2);
+  color: #9ec5ff;
+}
+
+.buff,
+.debuff {
+  background: rgba($accent-gold, 0.15);
+  color: $accent-gold;
+  text-transform: capitalize;
+  font-size: 0.7rem;
+}

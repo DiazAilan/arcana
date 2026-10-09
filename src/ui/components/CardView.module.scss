@@ -1,0 +1,76 @@
+@use '../../styles/variables' as *;
+
+.card {
+  aspect-ratio: $card-aspect;
+  width: 118px;
+  padding: 0.55rem 0.5rem;
+  border-radius: $radius-md;
+  background: linear-gradient(160deg, lighten($bg-card, 6%), $bg-card);
+  border: 2px solid $border-subtle;
+  text-align: left;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+  transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s;
+
+  &:hover:not(.disabled) {
+    transform: translateY(-6px);
+    box-shadow: 0 12px 24px rgba(0, 0, 0, 0.35);
+    border-color: rgba($accent-magic, 0.45);
+  }
+}
+
+.selected {
+  border-color: $accent-gold;
+  box-shadow: 0 0 0 2px rgba($accent-gold, 0.35);
+}
+
+.disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.cost {
+  align-self: flex-end;
+  width: 26px;
+  height: 26px;
+  border-radius: 50%;
+  background: rgba(0, 0, 0, 0.35);
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.name {
+  font-weight: 700;
+  font-size: 0.82rem;
+  line-height: 1.15;
+}
+
+.type {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $text-muted;
+}
+
+.desc {
+  margin: 0;
+  font-size: 0.68rem;
+  line-height: 1.25;
+  color: $text-muted;
+  flex: 1;
+}
+
+.attack {
+  border-top: 3px solid $accent-danger;
+}
+
+.skill {
+  border-top: 3px solid #6eb5ff;
+}
+
+.power {
+  border-top: 3px solid $accent-gold;
+}

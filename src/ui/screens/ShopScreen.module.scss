@@ -1,0 +1,64 @@
+@use '../../styles/variables' as *;
+
+.shop {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 1.25rem;
+  padding: 1rem;
+
+  header {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+
+    h2 {
+      margin: 0;
+    }
+  }
+}
+
+.offers {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+}
+
+.offer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 1rem;
+  background: $bg-panel;
+  border-radius: $radius-md;
+  max-width: 160px;
+}
+
+.relic {
+  font-weight: 700;
+  color: $accent-gold;
+}
+
+.desc {
+  font-size: 0.75rem;
+  color: $text-muted;
+  margin: 0;
+  text-align: center;
+}
+
+.remove {
+  width: 100%;
+
+  h3 {
+    text-align: center;
+  }
+}
+
+.deck {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: center;
+}

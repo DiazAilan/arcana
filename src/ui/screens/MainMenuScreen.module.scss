@@ -1,0 +1,27 @@
+@use '../../styles/variables' as *;
+
+.menu {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1.25rem;
+  text-align: center;
+}
+
+.title {
+  font-size: clamp(2.5rem, 8vw, 4rem);
+  margin: 0;
+  letter-spacing: 0.08em;
+  background: linear-gradient(180deg, #fff, $accent-magic);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.tagline {
+  max-width: 28rem;
+  color: $text-muted;
+  margin: 0 0 1rem;
+}

@@ -1,0 +1,34 @@
+@use '../../styles/variables' as *;
+
+.wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 140px;
+}
+
+.label {
+  font-size: 0.75rem;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.track {
+  flex: 1;
+  height: 8px;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.fill {
+  height: 100%;
+  background: linear-gradient(90deg, $accent-heal, darken($accent-heal, 12%));
+  transition: width 0.2s ease;
+}
+
+.text {
+  font-size: 0.85rem;
+  font-variant-numeric: tabular-nums;
+}

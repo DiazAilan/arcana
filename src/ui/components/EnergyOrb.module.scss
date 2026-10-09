@@ -1,0 +1,24 @@
+@use '../../styles/variables' as *;
+
+.orb {
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, lighten($accent-magic, 15%), $accent-magic);
+  box-shadow: 0 0 20px rgba($accent-magic, 0.45);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+}
+
+.value {
+  font-size: 1.35rem;
+  line-height: 1;
+}
+
+.sub {
+  font-size: 0.65rem;
+  opacity: 0.85;
+}

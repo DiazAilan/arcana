@@ -1,0 +1,20 @@
+@use '../../styles/variables' as *;
+
+.bar {
+  display: flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.relic {
+  width: 36px;
+  height: 36px;
+  border-radius: $radius-sm;
+  background: rgba($accent-gold, 0.15);
+  border: 1px solid rgba($accent-gold, 0.35);
+  display: grid;
+  place-items: center;
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: $accent-gold;
+}
