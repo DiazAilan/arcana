@@ -1,0 +1,26 @@
+@use '../../styles/variables' as *;
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.25rem 0.55rem;
+  border-radius: $radius-sm;
+  font-weight: 700;
+  font-size: 0.85rem;
+  border: 2px solid rgba(#9ec5ff, 0.45);
+  background: rgba(#4a7fd4, 0.2);
+  color: #c8e0ff;
+}
+
+.zero {
+  border-color: rgba($text-muted, 0.2);
+  background: rgba(0, 0, 0, 0.2);
+  color: rgba($text-muted, 0.45);
+  font-weight: 500;
+}
+
+.shield {
+  font-size: 0.75rem;
+  line-height: 1;
+}

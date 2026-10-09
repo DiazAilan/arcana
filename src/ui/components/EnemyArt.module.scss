@@ -1,0 +1,11 @@
+@use '../../styles/variables' as *;
+
+.wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.35rem;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: $radius-sm;
+  min-height: 88px;
+}

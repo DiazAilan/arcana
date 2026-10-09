@@ -2,6 +2,7 @@ import { useGame } from '../../context/GameContext'
 import { getRegistry } from '../../game/content/registry'
 import { createCardInstance } from '../../game/models/card'
 import { CardView } from '../components/CardView'
+import { RunHud } from '../components/RunHud'
 import styles from './ShopScreen.module.scss'
 
 export function ShopScreen() {
@@ -14,10 +15,7 @@ export function ShopScreen() {
 
   return (
     <div className={styles.shop}>
-      <header>
-        <h2>Relic Market</h2>
-        <span>{run.gold} gold</span>
-      </header>
+      <RunHud run={run} center={<h2 className={styles.title}>Relic Market</h2>} />
 
       <div className={styles.offers}>
         {shop.offers.map((offer, index) => {

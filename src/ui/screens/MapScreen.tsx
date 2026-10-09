@@ -1,8 +1,7 @@
 import { useGame } from '../../context/GameContext'
 import { getNode } from '../../game/run/mapGen'
 import type { MapNodeType } from '../../game/models/map'
-import { HpBar } from '../components/HpBar'
-import { RelicBar } from '../components/RelicBar'
+import { RunHud } from '../components/RunHud'
 import styles from './MapScreen.module.scss'
 
 const NODE_LABEL: Record<MapNodeType, string> = {
@@ -21,11 +20,7 @@ export function MapScreen() {
 
   return (
     <div className={styles.map}>
-      <header className={styles.header}>
-        <HpBar hp={run.hp} maxHp={run.maxHp} label="HP" />
-        <span className={styles.gold}>{run.gold} gold</span>
-        <RelicBar relicIds={run.relics} />
-      </header>
+      <RunHud run={run} />
 
       <p className={styles.prompt}>Choose your path</p>
 

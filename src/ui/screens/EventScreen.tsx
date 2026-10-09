@@ -1,5 +1,6 @@
 import { useGame } from '../../context/GameContext'
 import { getRegistry } from '../../game/content/registry'
+import { RunHud } from '../components/RunHud'
 import styles from './EventScreen.module.scss'
 
 export function EventScreen() {
@@ -11,6 +12,7 @@ export function EventScreen() {
 
   return (
     <div className={styles.event}>
+      <RunHud run={session.run} />
       <h2>{def.title}</h2>
       <p className={styles.body}>{def.body}</p>
       <div className={styles.choices}>

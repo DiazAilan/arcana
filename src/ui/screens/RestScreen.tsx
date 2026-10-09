@@ -1,5 +1,6 @@
 import { useGame } from '../../context/GameContext'
 import { CardView } from '../components/CardView'
+import { RunHud } from '../components/RunHud'
 import styles from './RestScreen.module.scss'
 
 export function RestScreen() {
@@ -7,13 +8,16 @@ export function RestScreen() {
   if (session.phase.kind !== 'rest' || !session.run) return null
 
   const run = session.run
+  const healAmount = Math.floor(run.maxHp * 0.3)
+  const afterHeal = Math.min(run.maxHp, run.hp + healAmount)
 
   return (
     <div className={styles.rest}>
+      <RunHud run={run} />
       <h2>Rest Site</h2>
       <div className={styles.options}>
         <button type="button" className="btnPrimary" onClick={() => dispatch({ type: 'REST_HEAL' })}>
-          Rest — heal 30% HP
+          Rest — heal {healAmount} HP ({run.hp} → {afterHeal})
         </button>
       </div>
 

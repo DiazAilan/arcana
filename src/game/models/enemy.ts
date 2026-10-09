@@ -11,6 +11,8 @@ export type IntentDef = {
 
 export type EnemyDef = {
   id: string
+  /** Sprite lookup key; defaults to id */
+  artKey?: string
   name: string
   maxHp: number
   intents: IntentDef[]

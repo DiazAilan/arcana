@@ -1,6 +1,7 @@
 import { useGame } from '../../context/GameContext'
 import { getRegistry } from '../../game/content/registry'
 import { CardView } from '../components/CardView'
+import { RunHud } from '../components/RunHud'
 import { createCardInstance } from '../../game/models/card'
 import styles from './RewardScreen.module.scss'
 
@@ -13,8 +14,11 @@ export function RewardScreen() {
 
   const canContinue = cardResolved && !relicOffer
 
+  const run = session.run
+
   return (
     <div className={styles.reward}>
+      <RunHud run={run} />
       <h2>Victory</h2>
       <p className={styles.gold}>+{gold} gold</p>
 

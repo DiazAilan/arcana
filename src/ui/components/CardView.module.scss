@@ -30,6 +30,20 @@
   cursor: not-allowed;
 }
 
+.art {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 44px;
+  margin-bottom: 0.15rem;
+  background: rgba(0, 0, 0, 0.2);
+  border-radius: $radius-sm;
+}
+
+.dragging {
+  opacity: 0.35;
+}
+
 .cost {
   align-self: flex-end;
   width: 26px;

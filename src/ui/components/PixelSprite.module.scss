@@ -1,0 +1,9 @@
+.sprite {
+  display: grid;
+  image-rendering: pixelated;
+  image-rendering: crisp-edges;
+}
+
+.cell {
+  aspect-ratio: 1;
+}

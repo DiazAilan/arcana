@@ -2,6 +2,8 @@ import type { CardType, CombatEffect } from './effects'
 
 export type CardDef = {
   id: string
+  /** Sprite lookup key; defaults to id */
+  artKey?: string
   name: string
   type: CardType
   cost: number
