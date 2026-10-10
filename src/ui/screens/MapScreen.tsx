@@ -7,12 +7,12 @@ import { RunHud } from '../components/RunHud'
 import styles from './MapScreen.module.scss'
 
 const NODE_LABEL: Record<MapNodeType, string> = {
-  battle: 'Fight',
+  battle: 'Combat',
   elite: 'Elite',
-  shop: 'Shop',
-  rest: 'Rest',
-  event: '?',
-  boss: 'Boss',
+  shop: 'Bazaar',
+  rest: 'Hearth',
+  event: 'Omen',
+  boss: 'Sanctum',
 }
 
 type LineSegment = {
@@ -136,13 +136,18 @@ export function MapScreen() {
   }, [edgeList, map])
 
   const atStart = isStartPhase(map)
+  const fly = import.meta.env.DEV && run.devFly === true
 
   return (
     <div className={styles.map}>
       <RunHud run={run} />
 
       <p className={styles.prompt}>
-        {atStart ? 'Pick a starting node (top row)' : 'Choose your path'}
+        {fly
+          ? 'Fly mode — select any uncleared node'
+          : atStart
+            ? 'Choose an entrance stratum'
+            : 'Descend — choose your path'}
       </p>
 
       <div className={styles.gridWrap}>
@@ -167,9 +172,9 @@ export function MapScreen() {
             </svg>
           ) : null}
           {map.nodes.map((node) => {
-            const available = map.availableNodeIds.includes(node.id)
             const cleared = map.clearedNodeIds.includes(node.id)
-            const startOption = atStart && available
+            const available = fly ? !cleared : map.availableNodeIds.includes(node.id)
+            const startOption = atStart && available && !fly
             return (
               <button
                 key={node.id}

@@ -21,8 +21,8 @@ export function MainMenuScreen() {
 
   return (
     <div className={styles.menu}>
-      <h1 className={styles.title}>Arcana</h1>
-      <p className={styles.tagline}>Climb the spire of ink and ember. One run. One deck.</p>
+      <h1 className={styles.title}>The Tomb of Primordials</h1>
+      <p className={styles.tagline}>Descend into the reign of the Old Avatar</p>
       <button type="button" className="btnPrimary" onClick={() => dispatch({ type: 'NEW_RUN' })}>
         New Run
       </button>

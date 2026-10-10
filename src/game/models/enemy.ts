@@ -14,6 +14,8 @@ export type EnemyDef = {
   /** Sprite lookup key; defaults to id */
   artKey?: string
   name: string
+  /** Short lore line under the name in combat (optional). */
+  flavor?: string
   maxHp: number
   intents: IntentDef[]
 }

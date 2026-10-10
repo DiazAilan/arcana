@@ -20,3 +20,4 @@ export type SessionAction =
   | { type: 'GO_MAIN_MENU' }
   | { type: 'DEV_RELIC_ADD'; relicId: string }
   | { type: 'DEV_RELIC_DELETE'; relicId: string }
+  | { type: 'DEV_SET_FLY'; enabled: boolean }

@@ -3,7 +3,8 @@ import type { EnemyDef } from '../../models/enemy'
 export const ACT1_ENEMIES: EnemyDef[] = [
   {
     id: 'mob_cultist',
-    name: 'Hollow Cultist',
+    name: 'Maskbound Acolyte',
+    flavor: 'The whisper behind the porcelain—obedience to something you cannot grasp.',
     maxHp: 48,
     intents: [
       { kind: 'buff', value: 2, power: 'strength' },
@@ -13,7 +14,7 @@ export const ACT1_ENEMIES: EnemyDef[] = [
   },
   {
     id: 'mob_jaw',
-    name: 'Glimmer Maw',
+    name: 'Gnawing Ghoul',
     maxHp: 42,
     intents: [
       { kind: 'attack', value: 7 },
@@ -23,7 +24,8 @@ export const ACT1_ENEMIES: EnemyDef[] = [
   },
   {
     id: 'mob_slime',
-    name: 'Quicksilver Slime',
+    name: 'Shame Shambler',
+    flavor: 'A piece of the melded horror—guilt that still crawls on borrowed legs.',
     maxHp: 36,
     intents: [
       { kind: 'attack', value: 5 },
@@ -33,7 +35,8 @@ export const ACT1_ENEMIES: EnemyDef[] = [
   },
   {
     id: 'mob_eye',
-    name: 'Wandering Eye',
+    name: 'Wailing Banshee',
+    flavor: 'Fear given a voice; it screams what you refuse to admit.',
     maxHp: 40,
     intents: [
       { kind: 'debuff', value: 2, power: 'vulnerable' },
@@ -43,7 +46,8 @@ export const ACT1_ENEMIES: EnemyDef[] = [
   },
   {
     id: 'mob_shade',
-    name: 'Ink Shade',
+    name: 'Errant Fragment',
+    flavor: 'A splinter of the Unbound—freedom with nothing left but appetite.',
     maxHp: 44,
     intents: [
       { kind: 'attack', value: 8 },
@@ -53,7 +57,8 @@ export const ACT1_ENEMIES: EnemyDef[] = [
   },
   {
     id: 'mob_golem',
-    name: 'Rune Golem',
+    name: 'Faceless Bulk',
+    flavor: 'No features—only a black pearl where a face should be.',
     maxHp: 52,
     intents: [
       { kind: 'block', value: 10 },
@@ -63,7 +68,8 @@ export const ACT1_ENEMIES: EnemyDef[] = [
   },
   {
     id: 'mob_wisp',
-    name: 'Fractal Wisp',
+    name: 'Splinter Wisp',
+    flavor: 'It hums with discord—a shard that forgot it was broken off.',
     maxHp: 32,
     intents: [
       { kind: 'attack', value: 6 },
@@ -73,7 +79,8 @@ export const ACT1_ENEMIES: EnemyDef[] = [
   },
   {
     id: 'mob_knight',
-    name: 'Fallen Signet',
+    name: 'Pearl Mask Stalker',
+    flavor: 'Man-shaped, mask-bound—look too long and your heart stutters.',
     maxHp: 58,
     intents: [
       { kind: 'attack', value: 9 },
@@ -83,7 +90,8 @@ export const ACT1_ENEMIES: EnemyDef[] = [
   },
   {
     id: 'elite_sentinel',
-    name: 'Vault Sentinel',
+    name: 'Splinter Colossus',
+    flavor: 'Many chaos-shards stacked in one shape, still refusing any master.',
     maxHp: 95,
     intents: [
       { kind: 'block', value: 15 },
@@ -93,8 +101,23 @@ export const ACT1_ENEMIES: EnemyDef[] = [
     ],
   },
   {
-    id: 'boss_archivist',
-    name: 'The Archivist',
+    id: 'elite_pearl_mask',
+    artKey: 'elite_pearl_mask',
+    name: 'Faceless Warden',
+    flavor: 'Horror’s shard behind a mask—do not ask what lies beneath.',
+    maxHp: 88,
+    intents: [
+      { kind: 'buff', value: 2, power: 'strength' },
+      { kind: 'attack', value: 10 },
+      { kind: 'block', value: 12 },
+      { kind: 'attack', value: 16 },
+    ],
+  },
+  {
+    id: 'boss_avatar_still_waters',
+    artKey: 'boss_avatar_still_waters',
+    name: 'Avatar of Still Waters',
+    flavor: 'Ice and silence; the sky’s scale-legends ended here.',
     maxHp: 140,
     intents: [
       { kind: 'attack', value: 10 },
@@ -104,8 +127,24 @@ export const ACT1_ENEMIES: EnemyDef[] = [
       { kind: 'attack', value: 22 },
     ],
   },
+  {
+    id: 'boss_primordial_echo',
+    artKey: 'boss_primordial_echo',
+    name: 'Thousandfold Splinter',
+    flavor: 'When chaos and horror were shattered together, not every piece stayed still.',
+    maxHp: 180,
+    intents: [
+      { kind: 'buff', value: 3, power: 'strength' },
+      { kind: 'attack', value: 14 },
+      { kind: 'attack', value: 20 },
+      { kind: 'debuff', value: 2, power: 'vulnerable' },
+      { kind: 'attack', value: 28 },
+    ],
+  },
 ]
 
 export const REGULAR_ENEMY_IDS = ACT1_ENEMIES.filter(
   (e) => !e.id.startsWith('elite_') && !e.id.startsWith('boss_'),
 ).map((e) => e.id)
+
+export const ELITE_ENEMY_IDS = ACT1_ENEMIES.filter((e) => e.id.startsWith('elite_')).map((e) => e.id)

@@ -20,4 +20,8 @@ export type RelicDef = {
   shopPrice?: number
   /** Gold when descending to a new map row */
   floorGold?: number
+  /** Domain Heart — enables confronting the buried power after the Avatar */
+  isHeart?: boolean
+  /** Internal domain tag for balance/content (not shown in UI) */
+  heartDomain?: 'creation' | 'chaos' | 'madness' | 'life' | 'passion' | 'still'
 }

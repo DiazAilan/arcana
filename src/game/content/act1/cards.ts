@@ -2,7 +2,7 @@ import type { CardDef } from '../../models/card'
 
 const strike: CardDef = {
   id: 'arc_strike',
-  name: 'Rune Strike',
+  name: 'Strike',
   type: 'attack',
   cost: 1,
   description: 'Deal 6 damage.',
@@ -15,7 +15,7 @@ const strike: CardDef = {
 
 const defend: CardDef = {
   id: 'arc_defend',
-  name: 'Glass Ward',
+  name: 'Block',
   type: 'skill',
   cost: 1,
   description: 'Gain 5 Block.',
@@ -31,7 +31,7 @@ export const ACT1_CARDS: CardDef[] = [
   defend,
   {
     id: 'arc_bash',
-    name: 'Sigil Bash',
+    name: 'Tomb Bash',
     type: 'attack',
     cost: 2,
     description: 'Deal 8 damage. Apply 2 Vulnerable.',
@@ -61,7 +61,7 @@ export const ACT1_CARDS: CardDef[] = [
   },
   {
     id: 'arc_focus',
-    name: 'Inner Focus',
+    name: 'Delver’s Focus',
     type: 'skill',
     cost: 0,
     description: 'Gain 2 Energy.',
@@ -73,7 +73,7 @@ export const ACT1_CARDS: CardDef[] = [
   },
   {
     id: 'arc_draw',
-    name: 'Scry Pages',
+    name: 'Dusty Tome',
     type: 'skill',
     cost: 1,
     description: 'Draw 2 cards.',
@@ -85,7 +85,7 @@ export const ACT1_CARDS: CardDef[] = [
   },
   {
     id: 'arc_heal',
-    name: 'Mend Thread',
+    name: 'Bind Wounds',
     type: 'skill',
     cost: 1,
     description: 'Heal 5 HP.',
@@ -97,7 +97,7 @@ export const ACT1_CARDS: CardDef[] = [
   },
   {
     id: 'arc_iron_skin',
-    name: 'Iron Sigil',
+    name: 'Iron Prayer',
     type: 'power',
     cost: 1,
     description: 'Gain 3 Metallicize.',
@@ -109,7 +109,7 @@ export const ACT1_CARDS: CardDef[] = [
   },
   {
     id: 'arc_might',
-    name: 'Arcane Might',
+    name: 'Grave Might',
     type: 'power',
     cost: 2,
     description: 'Gain 2 Strength.',
@@ -121,7 +121,7 @@ export const ACT1_CARDS: CardDef[] = [
   },
   {
     id: 'arc_agility',
-    name: 'Fleet Runes',
+    name: 'Fleet Step',
     type: 'power',
     cost: 1,
     description: 'Gain 1 Dexterity.',
@@ -133,7 +133,7 @@ export const ACT1_CARDS: CardDef[] = [
   },
   {
     id: 'arc_heavy',
-    name: 'Heavy Cantrip',
+    name: 'Heavy Swing',
     type: 'attack',
     cost: 2,
     description: 'Deal 14 damage.',
@@ -235,7 +235,7 @@ export const ACT1_CARDS: CardDef[] = [
   },
   {
     id: 'arc_channel',
-    name: 'Channel Aether',
+    name: 'Channel Depths',
     type: 'skill',
     cost: 2,
     description: 'Draw 3 cards. Gain 1 Energy.',
@@ -319,7 +319,7 @@ export const ACT1_CARDS: CardDef[] = [
   },
   {
     id: 'arc_lance',
-    name: 'Prismatic Lance',
+    name: 'Sapphire Lance',
     type: 'attack',
     cost: 2,
     description: 'Deal 11 damage. Apply 1 Vulnerable.',

@@ -10,7 +10,7 @@ export function DevConsole() {
   const { session, dispatch } = useGame()
   const [open, setOpen] = useState(false)
   const [lines, setLines] = useState<LogLine[]>([
-    { kind: 'out', text: 'Dev console — ` to toggle. Try /relic add relic_embers' },
+    { kind: 'out', text: 'Dev console — ` to toggle. /fly on · /relic add relic_embers' },
   ])
   const [value, setValue] = useState('')
   const inputRef = useRef<HTMLInputElement>(null)
@@ -57,13 +57,24 @@ export function DevConsole() {
       return
     }
 
+    const { command } = parsed
+
+    if (command.kind === 'fly_set') {
+      if (!session.run) {
+        append('err', 'No active run. Start a run first.')
+        return
+      }
+      dispatch({ type: 'DEV_SET_FLY', enabled: command.enabled })
+      append('ok', command.enabled ? 'Fly mode on — any uncleared node.' : 'Fly mode off — normal pathing.')
+      return
+    }
+
     if (!session.run) {
       append('err', 'No active run. Start a run first.')
       return
     }
 
     const registry = getRegistry()
-    const { command } = parsed
 
     if (command.kind === 'relic_add') {
       if (!registry.relics.has(command.relicId)) {

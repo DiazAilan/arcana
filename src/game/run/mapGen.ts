@@ -74,6 +74,27 @@ export function getNode(map: MapState, id: string): MapNode | undefined {
   return map.nodes.find((n) => n.id === id)
 }
 
+/** Dev fly mode — mark node cleared; any uncleared node stays selectable. */
+export function advanceMapFly(map: MapState, chosenNodeId: string): MapState {
+  const node = getNode(map, chosenNodeId)
+  if (!node || map.clearedNodeIds.includes(chosenNodeId)) return map
+
+  const clearedNodeIds = [...map.clearedNodeIds, chosenNodeId]
+  const availableNodeIds = map.nodes.filter((n) => !clearedNodeIds.includes(n.id)).map((n) => n.id)
+
+  return { ...map, clearedNodeIds, availableNodeIds }
+}
+
+export function availableNodesFromPath(map: MapState, currentNodeId: string | null): string[] {
+  if (map.clearedNodeIds.length === 0) {
+    return map.nodes.filter((n) => n.row === 0).map((n) => n.id)
+  }
+  if (!currentNodeId) return [...map.availableNodeIds]
+  const node = getNode(map, currentNodeId)
+  if (!node) return [...map.availableNodeIds]
+  return node.edges.filter((id) => !map.clearedNodeIds.includes(id))
+}
+
 export function advanceMap(map: MapState, chosenNodeId: string): MapState {
   const node = getNode(map, chosenNodeId)
   if (!node || !map.availableNodeIds.includes(chosenNodeId)) return map

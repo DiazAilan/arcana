@@ -39,7 +39,7 @@ describe('formatRunEffectOutcomes', () => {
       after,
     )
     expect(lines).toContain('Lost 8 HP.')
-    expect(lines).toContain('Received Ember Lens.')
+    expect(lines).toContain('Received Volcanic Heart-Stone.')
   })
 
   it('describes gold gain', () => {

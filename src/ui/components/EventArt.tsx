@@ -11,7 +11,7 @@ export function EventArt({ eventId, title }: Props) {
   const sprite = getEventSprite(eventId)
   return (
     <div className={styles.frame} title={title}>
-      <PixelSprite rows={sprite} pixelSize={1} />
+      <PixelSprite rows={sprite} pixelSize={2} />
     </div>
   )
 }

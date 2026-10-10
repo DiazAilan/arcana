@@ -45,7 +45,7 @@ export type GamePhase =
       pendingCards: string[] | null
       cardDecisions: Record<string, 'taken' | 'skipped'> | null
     }
-  | { kind: 'victory' }
+  | { kind: 'victory'; variant: 'sealed' | 'true' }
   | { kind: 'game_over' }
 
 export type RunState = {
@@ -58,6 +58,8 @@ export type RunState = {
   relics: string[]
   map: MapState
   currentNodeId: string | null
+  /** Dev-only: pick any uncleared map node regardless of edges. */
+  devFly?: boolean
 }
 
 export type GameSession = {

@@ -1,6 +1,7 @@
 export type DevConsoleCommand =
   | { kind: 'relic_add'; relicId: string }
   | { kind: 'relic_delete'; relicId: string }
+  | { kind: 'fly_set'; enabled: boolean }
 
 export type ParseResult =
   | { ok: true; command: DevConsoleCommand }
@@ -14,6 +15,17 @@ export function parseDevConsoleCommand(input: string): ParseResult {
 
   const parts = trimmed.split(/\s+/).filter(Boolean)
   const head = parts[0]?.toLowerCase()
+
+  if (head === '/fly') {
+    const mode = parts[1]?.toLowerCase()
+    if (mode === 'on' || mode === '1' || mode === 'true') {
+      return { ok: true, command: { kind: 'fly_set', enabled: true } }
+    }
+    if (mode === 'off' || mode === '0' || mode === 'false') {
+      return { ok: true, command: { kind: 'fly_set', enabled: false } }
+    }
+    return { ok: false, message: 'Usage: /fly on  or  /fly off' }
+  }
 
   if (head === '/relic' || head === '/relics') {
     const sub = parts[1]?.toLowerCase()

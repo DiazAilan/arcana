@@ -7,7 +7,7 @@ export function GameOverScreen() {
   return (
     <div className={styles.end}>
       <h1>Defeat</h1>
-      <p>Your run ends in the vaults below.</p>
+      <p>The tomb claims another delver. Your name will not be remembered.</p>
       <button type="button" className="btnPrimary" onClick={() => dispatch({ type: 'GO_MAIN_MENU' })}>
         Try Again
       </button>

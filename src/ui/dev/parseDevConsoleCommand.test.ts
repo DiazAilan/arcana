@@ -15,4 +15,9 @@ describe('parseDevConsoleCommand', () => {
   it('rejects missing args', () => {
     expect(parseDevConsoleCommand('/relic add').ok).toBe(false)
   })
+
+  it('parses fly on/off', () => {
+    expect(parseDevConsoleCommand('/fly on')).toEqual({ ok: true, command: { kind: 'fly_set', enabled: true } })
+    expect(parseDevConsoleCommand('/fly off')).toEqual({ ok: true, command: { kind: 'fly_set', enabled: false } })
+  })
 })

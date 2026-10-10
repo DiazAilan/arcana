@@ -1,10 +1,11 @@
+/** Player copy: no Primordial/hero proper names — see forbiddenLoreNames.test.ts */
 import type { EventDef } from '../../models/event'
 
 export const ACT1_EVENTS: EventDef[] = [
   {
     id: 'event_shrine',
-    title: 'Forgotten Shrine',
-    body: 'A cracked altar hums with leftover spellwork. Something may respond to an offering—or a theft.',
+    title: 'Collapsed Chapel',
+    body: 'Star-maps crack the ceiling. Votive wax still burns though no one remembers who lit it. Offer, steal, or walk away.',
     choices: [
       {
         label: 'Pray (lose 6 HP)',
@@ -25,8 +26,8 @@ export const ACT1_EVENTS: EventDef[] = [
   },
   {
     id: 'event_merchant',
-    title: 'Wandering Scribe',
-    body: 'A scribe offers a forbidden page in exchange for coin—or blood.',
+    title: 'Black Pearl Shrine',
+    body: 'A faceless statue cradles a dark orb. A hooded figure offers forbidden knowledge—for coin or blood.',
     choices: [
       {
         label: 'Pay 50 gold',
@@ -44,38 +45,38 @@ export const ACT1_EVENTS: EventDef[] = [
   },
   {
     id: 'event_mirror',
-    title: 'Mirror Pool',
-    body: 'Your reflection moves a heartbeat late. It might share a secret—for a price.',
+    title: 'Wall of Masks',
+    body: 'Hundreds of empty faces stare back. One moves a heartbeat late. Reach through—or break the wall.',
     choices: [
       {
-        label: 'Reach into the water',
+        label: 'Reach into the hollow',
         effects: [{ type: 'add_card', cardId: 'arc_might' }, { type: 'add_card', cardId: 'arc_weaken' }],
       },
       {
-        label: 'Shatter the mirror',
+        label: 'Shatter the masks',
         effects: [{ type: 'gold', amount: 30 }],
       },
     ],
   },
   {
     id: 'event_camp',
-    title: 'Ashen Campfire',
-    body: 'Embers still warm. Rest could steady your hands—or you could push onward.',
+    title: 'Venting Forge',
+    body: 'Heat rises from a crack in the floor—storm and ember trapped below. Rest here, or sift the slag for coin.',
     choices: [
       {
-        label: 'Rest by the fire',
+        label: 'Rest by the vent',
         effects: [{ type: 'heal_player', amount: 15 }],
       },
       {
-        label: 'Forage the camp',
+        label: 'Sift the slag',
         effects: [{ type: 'gold', amount: 25 }],
       },
     ],
   },
   {
     id: 'event_vault',
-    title: 'Locked Vault',
-    body: 'A rune lock clicks when you approach. Force, finesse, or walk away.',
+    title: 'Royal Locket Niche',
+    body: 'A diamond glints in a rusted locket. The lock hums when you approach—force, finesse, or retreat.',
     choices: [
       {
         label: 'Force it (lose 8 HP)',

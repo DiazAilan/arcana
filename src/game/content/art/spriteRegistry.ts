@@ -1,4 +1,5 @@
 import { ACT1_CARDS } from '../act1/cards'
+import { ACT1_ENEMIES } from '../act1/enemies'
 import { ACT1_EVENTS } from '../act1/events'
 import { ACT1_RELICS } from '../act1/relics'
 import { CARD_ART } from './literals/cardArt'
@@ -23,12 +24,15 @@ export const SPRITE_REGISTRY: SpriteEntry[] = [
     group: 'card' as const,
     rows: CARD_ART[card.id] ?? CARD_ART.arc_strike!,
   })),
-  ...Object.entries(ENEMY_ART).map(([id, rows]) => ({
-    id,
-    label: id,
-    group: 'enemy' as const,
-    rows,
-  })),
+  ...ACT1_ENEMIES.map((enemy) => {
+    const spriteKey = enemy.artKey ?? enemy.id
+    return {
+      id: spriteKey,
+      label: enemy.name,
+      group: 'enemy' as const,
+      rows: ENEMY_ART[spriteKey] ?? ENEMY_ART.mob_shade!,
+    }
+  }),
   ...ACT1_RELICS.map((relic) => ({
     id: relic.id,
     label: relic.name,

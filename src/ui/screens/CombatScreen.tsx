@@ -303,6 +303,7 @@ export function CombatScreen() {
               <HitParticles active={shaking} seed={enemyHit?.seed ?? 0} />
               <EnemyArt defId={enemy.defId} artKey={def?.artKey} />
               <h3>{def?.name ?? enemy.defId}</h3>
+              {def?.flavor ? <p className={styles.enemyFlavor}>{def.flavor}</p> : null}
               <HpBar hp={enemy.hp} maxHp={enemy.maxHp} previewHp={enemyHpPreview(enemyIndex)} />
               <BlockBadge block={enemy.block} />
               <PowerRow powers={enemy.powers} />

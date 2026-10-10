@@ -2,7 +2,13 @@ import type { GameSession, RunState } from '../models/session'
 import { createCardInstance, deckFromDefIds, resetCardInstanceCounter } from '../models/card'
 import { loadRegistry, getRegistry } from '../content/registry'
 import { randomSeed, type SeededRNG } from '../rng/SeededRNG'
-import { generateMap, advanceMap, getNode } from '../run/mapGen'
+import {
+  advanceMap,
+  advanceMapFly,
+  availableNodesFromPath,
+  generateMap,
+  getNode,
+} from '../run/mapGen'
 import { combatReducer } from '../combat/combatReducer'
 import { createCombatState } from '../combat/startCombat'
 import {
@@ -15,9 +21,10 @@ import { rollCardOffers, rollGoldReward, rollRelicOffer } from '../run/rewards'
 import { createShop } from '../run/shop'
 import { applyRunEffects } from '../run/runEffects'
 import { formatRunEffectOutcomes } from '../run/runEffectOutcomes'
-import { REGULAR_ENEMY_IDS } from '../content/act1/enemies'
+import { ELITE_ENEMY_IDS, REGULAR_ENEMY_IDS } from '../content/act1/enemies'
 import { ACT1_EVENTS, FALLBACK_EVENT_ID } from '../content/act1/events'
 import { ACT1_RELICS } from '../content/act1/relics'
+import { bossVictoryOutcome } from '../run/bossVictory'
 import type { SessionAction } from './sessionActions'
 import { gainBlock } from '../combat/damage'
 import type { CombatState } from '../combat/combatState'
@@ -37,13 +44,18 @@ function character() {
 }
 
 function pickEnemies(rng: SeededRNG, kind: 'battle' | 'elite' | 'boss'): string[] {
-  if (kind === 'boss') return ['boss_archivist']
-  if (kind === 'elite') return ['elite_sentinel']
+  if (kind === 'boss') return ['boss_avatar_still_waters']
+  if (kind === 'elite') return [rng.pick(ELITE_ENEMY_IDS)]
   return [rng.pick(REGULAR_ENEMY_IDS)]
 }
 
-function startCombatPhase(run: RunState, encounter: 'battle' | 'elite' | 'boss', rng: SeededRNG): GameSession {
-  const enemyDefIds = pickEnemies(rng, encounter)
+function startCombatPhase(
+  run: RunState,
+  encounter: 'battle' | 'elite' | 'boss',
+  rng: SeededRNG,
+  enemyDefIdsOverride?: string[],
+): GameSession {
+  const enemyDefIds = enemyDefIdsOverride ?? pickEnemies(rng, encounter)
   const maxEnergy = getMaxEnergyFromRelics(run.relics)
   let combat = createCombatState(run.deck, enemyDefIds, rng, maxEnergy, run.relics)
   const startBlock = getCombatStartBlock(run.relics)
@@ -80,7 +92,15 @@ function resolveCombatVictory(session: GameSession, rng: SeededRNG): GameSession
 
   const node = run.currentNodeId ? getNode(run.map, run.currentNodeId) : null
   if (node?.type === 'boss') {
-    return { run, phase: { kind: 'victory' } }
+    const bossId = phase.enemyDefIds[0] ?? ''
+    switch (bossVictoryOutcome(bossId, run.relics)) {
+      case 'echo_combat':
+        return startCombatPhase(run, 'boss', rng, ['boss_primordial_echo'])
+      case 'true':
+        return { run, phase: { kind: 'victory', variant: 'true' } }
+      case 'sealed':
+        return { run, phase: { kind: 'victory', variant: 'sealed' } }
+    }
   }
 
   const gold = rollGoldReward(phase.encounter, rng)
@@ -135,17 +155,23 @@ export function sessionReducer(
     case 'MAP_PICK_NODE': {
       const run = session.run
       if (!run || session.phase.kind !== 'map') return session
-      if (!run.map.availableNodeIds.includes(action.nodeId)) return session
 
+      const fly = import.meta.env.DEV && run.devFly === true
       const node = getNode(run.map, action.nodeId)
       if (!node) return session
+
+      if (fly) {
+        if (run.map.clearedNodeIds.includes(action.nodeId)) return session
+      } else if (!run.map.availableNodeIds.includes(action.nodeId)) {
+        return session
+      }
 
       const prevMaxRow = run.map.clearedNodeIds.reduce((max, id) => {
         const n = getNode(run.map, id)
         return n ? Math.max(max, n.row) : max
       }, -1)
 
-      const map = advanceMap(run.map, action.nodeId)
+      const map = fly ? advanceMapFly(run.map, action.nodeId) : advanceMap(run.map, action.nodeId)
       let nextRun: RunState = { ...run, map, currentNodeId: action.nodeId }
 
       if (node.row > prevMaxRow) {
@@ -392,6 +418,24 @@ export function sessionReducer(
       if (session.phase.kind !== 'event' || !session.run || !session.phase.outcome) return session
       if (session.phase.pendingCards != null && session.phase.pendingCards.length > 0) return session
       return afterNodeComplete(session)
+    }
+
+    case 'DEV_SET_FLY': {
+      if (!import.meta.env.DEV || !session.run) return session
+      let map = session.run.map
+      if (!action.enabled) {
+        const availableNodeIds = availableNodesFromPath(map, session.run.currentNodeId)
+        map = { ...map, availableNodeIds }
+      } else {
+        const availableNodeIds = map.nodes
+          .filter((n) => !map.clearedNodeIds.includes(n.id))
+          .map((n) => n.id)
+        map = { ...map, availableNodeIds }
+      }
+      return {
+        ...session,
+        run: { ...session.run, devFly: action.enabled, map },
+      }
     }
 
     case 'DEV_RELIC_ADD': {
