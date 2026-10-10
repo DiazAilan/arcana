@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import type { RunState } from '../../game/models/session'
 import { HpBar } from './HpBar'
 import { RelicBar } from './RelicBar'
@@ -7,16 +7,41 @@ import styles from './RunHud.module.scss'
 
 type Props = {
   run: RunState
-  /** Optional center content (e.g. encounter label, screen title) */
   center?: ReactNode
-  /** Optional trailing content (e.g. energy orb in combat) */
   trailing?: ReactNode
-  /** Hide deck button when deck viewer is not needed */
   showDeck?: boolean
+  deckOpen?: boolean
+  onDeckOpenChange?: (open: boolean) => void
 }
 
-export function RunHud({ run, center, trailing, showDeck = true }: Props) {
-  const [deckOpen, setDeckOpen] = useState(false)
+export function RunHud({
+  run,
+  center,
+  trailing,
+  showDeck = true,
+  deckOpen: deckOpenProp,
+  onDeckOpenChange,
+}: Props) {
+  const [deckOpenInternal, setDeckOpenInternal] = useState(false)
+  const deckOpen = deckOpenProp ?? deckOpenInternal
+
+  const setDeckOpen = (open: boolean) => {
+    onDeckOpenChange?.(open)
+    if (deckOpenProp === undefined) setDeckOpenInternal(open)
+  }
+
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.code !== 'KeyD' || e.repeat) return
+      const tag = (e.target as HTMLElement)?.tagName
+      if (tag === 'INPUT' || tag === 'TEXTAREA') return
+      if (!showDeck) return
+      e.preventDefault()
+      setDeckOpen(!deckOpen)
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [deckOpen, showDeck])
 
   return (
     <>
@@ -27,8 +52,8 @@ export function RunHud({ run, center, trailing, showDeck = true }: Props) {
         {center}
         <div className={styles.right}>
           {showDeck ? (
-            <button type="button" className="btnGhost" onClick={() => setDeckOpen(true)}>
-              Deck ({run.deck.length})
+            <button type="button" className="btnGhost" onClick={() => setDeckOpen(!deckOpen)}>
+              Deck ({run.deck.length}) · D
             </button>
           ) : null}
           {trailing}

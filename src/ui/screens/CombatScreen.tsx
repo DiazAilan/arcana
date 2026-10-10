@@ -5,6 +5,7 @@ import { BlockBadge } from '../components/BlockBadge'
 import { EnemyArt } from '../components/EnemyArt'
 import { EnergyOrb } from '../components/EnergyOrb'
 import { Hand } from '../components/Hand'
+import { HitParticles } from '../components/HitParticles'
 import { HpBar } from '../components/HpBar'
 import { IntentIcon } from '../components/IntentIcon'
 import { PowerRow } from '../components/PowerRow'
@@ -16,7 +17,11 @@ export function CombatScreen() {
   const [dragOverEnemy, setDragOverEnemy] = useState<number | null>(null)
   const [hitFlash, setHitFlash] = useState(false)
   const [damageFloat, setDamageFloat] = useState<number | null>(null)
+  const [enemyHit, setEnemyHit] = useState<{ id: string; seed: number } | null>(null)
+  const [drawPileFlash, setDrawPileFlash] = useState(false)
   const prevHpRef = useRef<number | null>(null)
+  const prevEnemyHpRef = useRef<Map<string, number>>(new Map())
+  const prevDrawPileLenRef = useRef<number | null>(null)
 
   const phase = session.phase
   const inCombat = phase.kind === 'combat' && session.run != null
@@ -43,6 +48,32 @@ export function CombatScreen() {
       window.clearTimeout(t2)
     }
   }, [hp, inCombat, run])
+
+  useEffect(() => {
+    if (!combat) return
+
+    const prevMap = prevEnemyHpRef.current
+    for (const enemy of combat.enemies) {
+      const prevHp = prevMap.get(enemy.instanceId)
+      if (prevHp != null && enemy.hp < prevHp) {
+        setEnemyHit({ id: enemy.instanceId, seed: Date.now() })
+        window.setTimeout(() => setEnemyHit((h) => (h?.id === enemy.instanceId ? null : h)), 400)
+      }
+      prevMap.set(enemy.instanceId, enemy.hp)
+    }
+  }, [combat])
+
+  useEffect(() => {
+    if (!combat) return
+    const len = combat.drawPile.length
+    const prev = prevDrawPileLenRef.current
+    prevDrawPileLenRef.current = len
+    if (prev != null && len < prev && combat.hand.length > 0) {
+      setDrawPileFlash(true)
+      const t = window.setTimeout(() => setDrawPileFlash(false), 240)
+      return () => window.clearTimeout(t)
+    }
+  }, [combat])
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -82,14 +113,16 @@ export function CombatScreen() {
         {combat.enemies.map((enemy, enemyIndex) => {
           const def = getRegistry().enemies.get(enemy.defId)
           const isDropTarget = dragOverEnemy === enemyIndex
+          const shaking = enemyHit?.id === enemy.instanceId
           return (
             <div
               key={enemy.instanceId}
-              className={`${styles.enemy} ${isDropTarget ? styles.enemyDropTarget : ''}`}
+              className={`${styles.enemy} ${isDropTarget ? styles.enemyDropTarget : ''} ${shaking ? styles.enemyShake : ''}`}
               data-enemy-drop={enemyIndex}
             >
-              <EnemyArt defId={enemy.defId} artKey={def?.artKey} />
               <IntentIcon enemy={enemy} />
+              <HitParticles active={shaking} seed={enemyHit?.seed ?? 0} />
+              <EnemyArt defId={enemy.defId} artKey={def?.artKey} />
               <h3>{def?.name ?? enemy.defId}</h3>
               <HpBar hp={enemy.hp} maxHp={enemy.maxHp} />
               <BlockBadge block={enemy.block} />
@@ -99,31 +132,37 @@ export function CombatScreen() {
         })}
       </div>
 
-      <div className={`${styles.player} ${hitFlash ? styles.playerShake : ''}`}>
-        <HpBar hp={run.hp} maxHp={run.maxHp} label="You" />
-        {damageFloat != null ? <span className={styles.damageFloat}>−{damageFloat}</span> : null}
-        <BlockBadge block={combat.playerBlock} />
-        <PowerRow powers={combat.playerPowers} />
-        <div className={styles.piles}>
-          Draw {combat.drawPile.length} · Discard {combat.discardPile.length}
+      <div className={styles.playerDock}>
+        <div className={`${styles.playerZone} ${hitFlash ? styles.playerShake : ''}`}>
+          <div className={styles.playerMain}>
+            <HpBar hp={run.hp} maxHp={run.maxHp} label="You" />
+            {damageFloat != null ? <span className={styles.damageFloat}>−{damageFloat}</span> : null}
+            <PowerRow powers={combat.playerPowers} />
+            <div className={`${styles.piles} ${drawPileFlash ? styles.pilesFlash : ''}`}>
+              Draw {combat.drawPile.length} · Discard {combat.discardPile.length}
+            </div>
+            <button
+              type="button"
+              className="btnPrimary"
+              disabled={!canPlay}
+              onClick={() => dispatch({ type: 'COMBAT', action: { type: 'END_TURN' } })}
+            >
+              End Turn (Space)
+            </button>
+          </div>
+          <div className={styles.playerBlockWrap}>
+            <BlockBadge block={combat.playerBlock} size="large" />
+          </div>
         </div>
-        <button
-          type="button"
-          className="btnPrimary"
-          disabled={!canPlay}
-          onClick={() => dispatch({ type: 'COMBAT', action: { type: 'END_TURN' } })}
-        >
-          End Turn (Space)
-        </button>
-      </div>
 
-      <Hand
-        hand={combat.hand}
-        energy={combat.energy}
-        onPlay={playCard}
-        canPlay={canPlay}
-        onDragOverEnemy={setDragOverEnemy}
-      />
+        <Hand
+          hand={combat.hand}
+          energy={combat.energy}
+          onPlay={playCard}
+          canPlay={canPlay}
+          onDragOverEnemy={setDragOverEnemy}
+        />
+      </div>
     </div>
   )
 }

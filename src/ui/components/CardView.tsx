@@ -32,7 +32,7 @@ export function CardView({ card, disabled, onClick, selected, dragging, onPointe
       onPointerDown={onPointerDown}
     >
       <div className={styles.art}>
-        <PixelSprite rows={sprite} pixelSize={5} />
+        <PixelSprite rows={sprite} pixelSize={3} />
       </div>
       <div className={styles.cost}>{def.cost}</div>
       <div className={styles.name}>{def.name}{card.upgraded ? '+' : ''}</div>

@@ -13,7 +13,34 @@
 }
 
 .slot {
+  position: relative;
   transform: rotate(calc((var(--i) - 2) * 3deg));
+}
+
+.slotKey {
+  position: absolute;
+  top: -4px;
+  left: 6px;
+  z-index: 2;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: rgba(255, 255, 255, 0.45);
+  pointer-events: none;
+}
+
+.entering {
+  animation: cardDrawIn 240ms ease-out;
+}
+
+@keyframes cardDrawIn {
+  0% {
+    opacity: 0;
+    transform: rotate(calc((var(--i) - 2) * 3deg)) translate(40px, -48px) scale(0.85);
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(calc((var(--i) - 2) * 3deg)) translate(0, 0) scale(1);
+  }
 }
 
 .hint {

@@ -15,16 +15,54 @@
   color: $text-muted;
 }
 
+.playerDock {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.playerZone {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.65rem 1rem;
+  background: rgba(0, 0, 0, 0.28);
+  border-radius: $radius-md;
+  position: relative;
+}
+
+.playerShake {
+  animation: combatShake 0.4s ease;
+}
+
+.playerMain {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.75rem 1rem;
+  flex: 1;
+  position: relative;
+}
+
+.playerBlockWrap {
+  flex-shrink: 0;
+  align-self: flex-start;
+}
+
 .enemies {
   flex: 1;
   display: flex;
   justify-content: center;
   align-items: flex-start;
   gap: 2rem;
-  padding: 2rem 1rem;
+  padding: 1rem 1rem 0.5rem;
+  min-height: 0;
 }
 
 .enemy {
+  position: relative;
   background: $bg-panel;
   border: 1px solid $border-subtle;
   border-radius: $radius-lg;
@@ -47,28 +85,22 @@
   box-shadow: 0 0 0 3px rgba($accent-magic, 0.25);
 }
 
-.player {
-  display: flex;
-  align-items: center;
-  gap: 1rem;
-  flex-wrap: wrap;
-  padding: 0.75rem 1rem;
-  background: rgba(0, 0, 0, 0.25);
-  border-radius: $radius-md;
-  position: relative;
+.enemyShake {
+  animation: enemyShake 0.32s ease;
 }
 
 .piles {
   font-size: 0.8rem;
   color: $text-muted;
+  transition: color 0.15s ease;
+}
+
+.pilesFlash {
+  color: $accent-gold;
 }
 
 .hitFlash {
   animation: combatHitFlash 0.45s ease-out;
-}
-
-.playerShake {
-  animation: combatShake 0.4s ease;
 }
 
 .damageFloat {
@@ -111,6 +143,22 @@
   }
   80% {
     transform: translateX(4px);
+  }
+}
+
+@keyframes enemyShake {
+  0%,
+  100% {
+    transform: translateX(0);
+  }
+  25% {
+    transform: translateX(-5px);
+  }
+  50% {
+    transform: translateX(5px);
+  }
+  75% {
+    transform: translateX(-3px);
   }
 }
 

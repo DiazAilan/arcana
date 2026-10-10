@@ -12,7 +12,7 @@ export function EnemyArt({ defId, artKey }: Props) {
   const rows = getEnemySprite(key)
   return (
     <div className={styles.wrap}>
-      <PixelSprite rows={rows} pixelSize={10} />
+      <PixelSprite rows={rows} pixelSize={5} />
     </div>
   )
 }

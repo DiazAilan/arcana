@@ -1,0 +1,92 @@
+@use '../../styles/variables' as *;
+
+.gallery {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+  max-height: 100vh;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+
+  h1 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+}
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 1.25rem;
+  padding: 0.75rem;
+  background: rgba(0, 0, 0, 0.25);
+  border-radius: $radius-md;
+}
+
+.swatch {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  font-size: 0.7rem;
+  font-family: ui-monospace, monospace;
+  color: $text-muted;
+}
+
+.chip {
+  width: 14px;
+  height: 14px;
+  border-radius: 2px;
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.card {
+  background: $bg-panel;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+  padding: 0.75rem;
+}
+
+.label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.preview {
+  display: flex;
+  justify-content: center;
+  padding: 0.5rem;
+  background: rgba(0, 0, 0, 0.35);
+  border-radius: $radius-sm;
+  margin-bottom: 0.5rem;
+}
+
+.source {
+  margin: 0;
+  font-size: 0.62rem;
+  line-height: 1.15;
+  font-family: ui-monospace, monospace;
+  color: $text-muted;
+  overflow-x: auto;
+  white-space: pre;
+}
+
+.hint {
+  font-size: 0.75rem;
+  color: $text-muted;
+  margin-bottom: 1rem;
+}

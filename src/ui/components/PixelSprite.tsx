@@ -1,4 +1,5 @@
-import { SPRITE_PALETTE, type SpriteRows } from '../../game/content/art/sprites'
+import { SPRITE_PALETTE } from '../../game/content/art/palette'
+import type { SpriteRows } from '../../game/content/art/sprites'
 import styles from './PixelSprite.module.scss'
 
 type Props = {

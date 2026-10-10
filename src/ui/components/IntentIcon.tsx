@@ -1,23 +1,23 @@
-import { getCurrentIntent } from '../../game/combat/intents'
+import { getIntentDisplay } from '../../game/combat/intents'
 import type { EnemyInstance } from '../../game/models/enemy'
 import styles from './IntentIcon.module.scss'
 
 type Props = { enemy: EnemyInstance }
 
 export function IntentIcon({ enemy }: Props) {
-  const intent = getCurrentIntent(enemy)
-  if (!intent) return null
-
-  const label =
-    intent.kind === 'attack'
-      ? `${intent.value}`
-      : intent.kind === 'block'
-        ? `+${intent.value}`
-        : intent.kind
+  const display = getIntentDisplay(enemy)
+  if (!display) return null
 
   return (
-    <div className={`${styles.intent} ${styles[intent.kind]}`} title={intent.kind}>
-      {label}
+    <div
+      className={`${styles.cap} ${styles[display.family]}`}
+      title={display.tooltip}
+      aria-label={display.tooltip}
+    >
+      <span className={styles.symbol} aria-hidden>
+        {display.symbol}
+      </span>
+      <span className={styles.value}>{display.valueLabel}</span>
     </div>
   )
 }
