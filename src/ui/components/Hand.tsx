@@ -30,9 +30,17 @@ function isTypingTarget(target: EventTarget | null): boolean {
   return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'BUTTON'
 }
 
+const MAX_HAND_HOTKEY_INDEX = 9
+
 function digitToIndex(key: string): number | null {
-  if (key >= '1' && key <= '5') return Number(key) - 1
+  if (key >= '1' && key <= '9') return Number(key) - 1
+  if (key === '0') return MAX_HAND_HOTKEY_INDEX
   return null
+}
+
+function handSlotKeyLabel(index: number): string {
+  if (index === MAX_HAND_HOTKEY_INDEX) return '0'
+  return String(index + 1)
 }
 
 export function Hand({
@@ -90,6 +98,14 @@ export function Hand({
       onPlay(index, targetEnemyIndex)
     },
     [hand, canPlay, energy, onPlay],
+  )
+
+  const syncHoverFromCursor = useCallback(
+    (clientX: number, clientY: number) => {
+      const drop = findDropTarget(clientX, clientY)
+      onDragOverEnemy(drop.hand ? null : drop.enemyIndex)
+    },
+    [onDragOverEnemy],
   )
 
   const clearDragUi = useCallback(() => {
@@ -159,7 +175,10 @@ export function Hand({
       cursorRef.current = { x: e.clientX, y: e.clientY }
       const drag = dragRef.current
       if (!drag || e.pointerId !== drag.pointerId) {
-        if (keyboardDragRef.current) setGhostPos(cursorRef.current)
+        if (keyboardDragRef.current) {
+          setGhostPos(cursorRef.current)
+          syncHoverFromCursor(e.clientX, e.clientY)
+        }
         return
       }
 
@@ -181,7 +200,10 @@ export function Hand({
 
     const onMouseMove = (e: MouseEvent) => {
       cursorRef.current = { x: e.clientX, y: e.clientY }
-      if (keyboardDragRef.current) setGhostPos(cursorRef.current)
+      if (keyboardDragRef.current) {
+        setGhostPos(cursorRef.current)
+        syncHoverFromCursor(e.clientX, e.clientY)
+      }
     }
 
     const onUp = (e: PointerEvent) => {
@@ -200,7 +222,7 @@ export function Hand({
       window.removeEventListener('pointerup', onUp)
       window.removeEventListener('pointercancel', onUp)
     }
-  }, [finishPointerDrag, onDragOverEnemy, setDragIndex])
+  }, [finishPointerDrag, onDragOverEnemy, setDragIndex, syncHoverFromCursor])
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -221,6 +243,7 @@ export function Hand({
       setDragIndex(idx)
       setGhostVisible(true)
       setGhostPos(cursorRef.current)
+      syncHoverFromCursor(cursorRef.current.x, cursorRef.current.y)
     }
 
     const onKeyUp = (e: KeyboardEvent) => {
@@ -239,7 +262,7 @@ export function Hand({
       window.removeEventListener('keydown', onKeyDown)
       window.removeEventListener('keyup', onKeyUp)
     }
-  }, [canPlay, clearDragUi, energy, finishDragAt, hand, setDragIndex])
+  }, [canPlay, clearDragUi, energy, finishDragAt, hand, setDragIndex, syncHoverFromCursor])
 
   const onPointerDown = (index: number) => (e: React.PointerEvent) => {
     if (!canPlay || e.button !== 0 || keyboardDragRef.current) return
@@ -292,7 +315,7 @@ export function Hand({
               className={`${styles.slot} ${enteringIds.has(card.instanceId) ? styles.entering : ''}`}
               style={{ ['--i' as string]: index }}
             >
-              <span className={styles.slotKey}>{index + 1}</span>
+              <span className={styles.slotKey}>{handSlotKeyLabel(index)}</span>
               <CardView
                 card={card}
                 disabled={!canPlay}
@@ -307,7 +330,7 @@ export function Hand({
           ))}
         </div>
         <span className={styles.hint}>
-          Energy: {energy} · 1–5 hold & release · drag to play · right-click: base card
+          Energy: {energy} · 1–9, 0=10th · hold & release · drag to play · right-click: base card
         </span>
       </div>
     </>

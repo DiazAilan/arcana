@@ -1,11 +1,15 @@
+import type { CombatState } from '../../game/combat/combatState'
 import { getIntentDisplay } from '../../game/combat/intents'
 import type { EnemyInstance } from '../../game/models/enemy'
 import styles from './IntentIcon.module.scss'
 
-type Props = { enemy: EnemyInstance }
+type Props = {
+  enemy: EnemyInstance
+  playerPowers?: CombatState['playerPowers']
+}
 
-export function IntentIcon({ enemy }: Props) {
-  const display = getIntentDisplay(enemy)
+export function IntentIcon({ enemy, playerPowers }: Props) {
+  const display = getIntentDisplay(enemy, playerPowers)
   if (!display) return null
 
   return (

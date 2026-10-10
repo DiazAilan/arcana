@@ -25,3 +25,26 @@
   flex-direction: column;
   gap: 0.75rem;
 }
+
+.outcome {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  align-items: center;
+}
+
+.outcomeLabel {
+  margin: 0;
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: $accent-gold;
+}
+
+.outcomeList {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  color: $text-primary;
+  line-height: 1.5;
+}

@@ -242,7 +242,7 @@ export const ACT1_CARDS: CardDef[] = [
     effects: [{ type: 'draw', amount: 3 }, { type: 'gain_energy', amount: 1 }],
     upgrade: {
       description: 'Draw 4 cards. Gain 2 Energy.',
-      effects: [{ type: 'draw', amount: 4 }, { type: 'gain_energy', amount: 2 }],
+      effects: [{ type: 'draw', amount: 4 }, { type: 'gain_energy', amount: 1 }],
     },
   },
   {

@@ -35,7 +35,7 @@ export type GamePhase =
     }
   | { kind: 'shop'; shop: ShopState }
   | { kind: 'rest' }
-  | { kind: 'event'; eventId: string }
+  | { kind: 'event'; eventId: string; outcome: string[] | null }
   | { kind: 'victory' }
   | { kind: 'game_over' }
 

@@ -1,0 +1,106 @@
+@use '../../styles/variables' as *;
+
+.wrap {
+  position: fixed;
+  inset: 0;
+  z-index: 200;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 0.75rem;
+}
+
+.open {
+  pointer-events: auto;
+  background: rgba(0, 0, 0, 0.45);
+}
+
+.panel {
+  max-width: 640px;
+  width: 100%;
+  margin: 0 auto;
+  background: rgba(10, 9, 16, 0.94);
+  border: 1px solid rgba($accent-magic, 0.45);
+  border-radius: $radius-md;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.55);
+  display: flex;
+  flex-direction: column;
+  max-height: min(42vh, 320px);
+  pointer-events: auto;
+}
+
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.4rem 0.65rem;
+  border-bottom: 1px solid $border-subtle;
+  font-size: 0.72rem;
+  color: $text-muted;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.log {
+  flex: 1;
+  overflow-y: auto;
+  padding: 0.5rem 0.65rem;
+  font-family: ui-monospace, monospace;
+  font-size: 0.72rem;
+  line-height: 1.45;
+}
+
+.line {
+  margin: 0 0 0.25rem;
+  word-break: break-word;
+
+  &.in {
+    color: $text-muted;
+  }
+
+  &.out {
+    color: $text-primary;
+  }
+
+  &.err {
+    color: $accent-danger;
+  }
+
+  &.ok {
+    color: $accent-heal;
+  }
+}
+
+.form {
+  display: flex;
+  border-top: 1px solid $border-subtle;
+}
+
+.prompt {
+  padding: 0.55rem 0.5rem 0.55rem 0.65rem;
+  color: $accent-magic;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+}
+
+.input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: $text-primary;
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+  padding: 0.55rem 0.65rem 0.55rem 0;
+  outline: none;
+}
+
+.hint {
+  position: fixed;
+  bottom: 0.5rem;
+  right: 0.65rem;
+  font-size: 0.65rem;
+  color: rgba($text-muted, 0.65);
+  pointer-events: none;
+  font-family: ui-monospace, monospace;
+}

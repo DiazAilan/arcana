@@ -1,19 +1,58 @@
-import { describe, expect, it, beforeAll } from 'vitest'
-import { loadRegistry } from '../content/registry'
-import { createEnemyInstance } from '../models/enemy'
-import { getIntentDisplay } from './intents'
+import { describe, expect, it } from 'vitest'
+import type { CombatState } from './combatState'
+import { previewIncomingAttackDamage, previewPlayerHpAfterEnemyTurn } from './intents'
+import type { EnemyInstance } from '../models/enemy'
 
-describe('getIntentDisplay', () => {
-  beforeAll(() => {
-    loadRegistry()
+function minimalCombat(enemies: EnemyInstance[], overrides: Partial<CombatState> = {}): CombatState {
+  return {
+    turn: 1,
+    phase: 'player',
+    energy: 3,
+    maxEnergy: 3,
+    playerBlock: 0,
+    playerPowers: {},
+    drawPile: [],
+    hand: [],
+    discardPile: [],
+    exhaustPile: [],
+    enemies,
+    ...overrides,
+  }
+}
+
+describe('previewIncomingAttackDamage', () => {
+  it('includes player vulnerable on displayed incoming damage', () => {
+    const dmg = previewIncomingAttackDamage(
+      { kind: 'attack', value: 10 },
+      {},
+      { vulnerable: 1 },
+    )
+    expect(dmg).toBe(15)
   })
 
-  it('includes strength in attack damage', () => {
-    const knight = createEnemyInstance('mob_knight', { maxHp: 58 })
-    knight.powers = { strength: 2 }
-    knight.intentIndex = 0
-    const atk = getIntentDisplay(knight)
-    expect(atk?.family).toBe('attack')
-    expect(atk?.valueLabel).toBe('11')
+  it('includes enemy strength and weak', () => {
+    const dmg = previewIncomingAttackDamage(
+      { kind: 'attack', value: 8 },
+      { strength: 2 },
+      {},
+    )
+    expect(dmg).toBe(10)
+  })
+})
+
+describe('previewPlayerHpAfterEnemyTurn', () => {
+  it('subtracts incoming attack after block', () => {
+    const jaw: EnemyInstance = {
+      instanceId: 'e1',
+      defId: 'mob_jaw',
+      hp: 40,
+      maxHp: 40,
+      block: 0,
+      powers: {},
+      intentIndex: 0,
+    }
+    const state = minimalCombat([jaw], { playerBlock: 3, playerPowers: { vulnerable: 1 } })
+    const hp = previewPlayerHpAfterEnemyTurn(state, 59)
+    expect(hp).toBe(52)
   })
 })

@@ -1,16 +1,17 @@
+import type { CardInstance } from '../../game/models/card'
+import { CardView } from './CardView'
+import { groupDeck } from './deckGrouping'
 import styles from './DeckViewerModal.module.scss'
-import cardBackStyles from './DrawPileModal.module.scss'
+import pileStyles from './DrawPileModal.module.scss'
 
 type Props = {
-  count: number
+  drawPile: CardInstance[]
   onClose: () => void
 }
 
-function CardBack() {
-  return <div className={cardBackStyles.back} aria-hidden />
-}
+export function DrawPileModal({ drawPile, onClose }: Props) {
+  const groups = groupDeck(drawPile)
 
-export function DrawPileModal({ count, onClose }: Props) {
   return (
     <div className={styles.backdrop} role="presentation" onClick={onClose}>
       <div
@@ -27,16 +28,23 @@ export function DrawPileModal({ count, onClose }: Props) {
           </button>
         </div>
         <div className={styles.body}>
-          <p className={cardBackStyles.hint}>Order and identities are hidden.</p>
-          <div className={styles.grid}>
-            {Array.from({ length: count }, (_, i) => (
-              <div key={i} className={styles.item}>
-                <CardBack />
+          {drawPile.length === 0 ? (
+            <p className={styles.footer}>Empty</p>
+          ) : (
+            <>
+              <p className={pileStyles.hint}>Draw order is hidden; cards are grouped by name.</p>
+              <div className={styles.grid}>
+                {groups.map((g) => (
+                  <div key={g.key} className={styles.item}>
+                    {g.count > 1 ? <span className={styles.count}>×{g.count}</span> : null}
+                    <CardView card={g.sample} />
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </>
+          )}
         </div>
-        <p className={styles.footer}>{count} cards to draw</p>
+        <p className={styles.footer}>{drawPile.length} cards to draw</p>
       </div>
     </div>
   )

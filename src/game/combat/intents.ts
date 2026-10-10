@@ -2,7 +2,7 @@ import type { PowerKind } from '../models/effects'
 import type { EnemyDef, EnemyInstance, IntentDef } from '../models/enemy'
 import type { CombatState } from './combatState'
 import { dealDamageToPlayer, gainBlock } from './damage'
-import { addPower, getPower, weakMultiplier } from './powers'
+import { addPower, getPower, vulnerableMultiplier, weakMultiplier } from './powers'
 import { getRegistry } from '../content/registry'
 
 const POWER_INTENT_LABEL: Record<PowerKind, string> = {
@@ -20,14 +20,28 @@ export type IntentDisplay = {
   tooltip: string
 }
 
-export function getIntentDisplay(enemy: EnemyInstance): IntentDisplay | null {
+export function previewIncomingAttackDamage(
+  intent: IntentDef,
+  enemyPowers: EnemyInstance['powers'],
+  playerPowers: CombatState['playerPowers'],
+): number {
+  if (intent.kind !== 'attack') return 0
+  let dmg = intent.value + getPower(enemyPowers, 'strength')
+  dmg = Math.floor(dmg * weakMultiplier(enemyPowers))
+  dmg = Math.floor(dmg * vulnerableMultiplier(playerPowers))
+  return Math.max(0, dmg)
+}
+
+export function getIntentDisplay(
+  enemy: EnemyInstance,
+  playerPowers: CombatState['playerPowers'] = {},
+): IntentDisplay | null {
   const intent = getCurrentIntent(enemy)
   if (!intent) return null
 
   switch (intent.kind) {
     case 'attack': {
-      let dmg = intent.value + getPower(enemy.powers, 'strength')
-      dmg = Math.floor(dmg * weakMultiplier(enemy.powers))
+      const dmg = previewIncomingAttackDamage(intent, enemy.powers, playerPowers)
       return {
         family: 'attack',
         symbol: '⚔',
@@ -47,7 +61,7 @@ export function getIntentDisplay(enemy: EnemyInstance): IntentDisplay | null {
       return {
         family: 'tactical',
         symbol: '✦',
-        valueLabel: intent.power ? `${POWER_INTENT_LABEL[intent.power]?.slice(0, 3) ?? '?'} +${intent.value}` : `+${intent.value}`,
+        valueLabel: 'Buff',
         tooltip: `Gaining ${intent.value} ${name}`,
       }
     }
@@ -56,7 +70,7 @@ export function getIntentDisplay(enemy: EnemyInstance): IntentDisplay | null {
       return {
         family: 'tactical',
         symbol: '✦',
-        valueLabel: intent.power ? `${POWER_INTENT_LABEL[intent.power]?.slice(0, 4) ?? '?'} ${intent.value}` : `${intent.value}`,
+        valueLabel: 'Debuff',
         tooltip: `Applying ${intent.value} ${name} to you`,
       }
     }
@@ -78,6 +92,41 @@ export function advanceIntent(enemy: EnemyInstance, def: EnemyDef): EnemyInstanc
   }
 }
 
+/** Player HP after living enemies resolve their current intents (block absorbs first). */
+export function previewPlayerHpAfterEnemyTurn(state: CombatState, playerHp: number): number {
+  let next = { ...state }
+  let hp = playerHp
+
+  for (const enemy of next.enemies) {
+    if (enemy.hp <= 0) continue
+    const intent = getCurrentIntent(enemy)
+    if (!intent) continue
+
+    switch (intent.kind) {
+      case 'attack': {
+        let raw = intent.value + getPower(enemy.powers, 'strength')
+        raw = Math.floor(raw * weakMultiplier(enemy.powers))
+        const result = dealDamageToPlayer(next.playerBlock, hp, raw, next.playerPowers)
+        next = { ...next, playerBlock: result.block }
+        hp = result.hp
+        break
+      }
+      case 'debuff':
+        if (intent.power) {
+          next = {
+            ...next,
+            playerPowers: addPower(next.playerPowers, intent.power, intent.value),
+          }
+        }
+        break
+      default:
+        break
+    }
+  }
+
+  return hp
+}
+
 export function executeEnemyTurn(
   state: CombatState,
   playerHp: number,
@@ -96,9 +145,9 @@ export function executeEnemyTurn(
     if (intent) {
       switch (intent.kind) {
         case 'attack': {
-          let dmg = intent.value + getPower(enemy.powers, 'strength')
-          dmg = Math.floor(dmg * weakMultiplier(enemy.powers))
-          const result = dealDamageToPlayer(next.playerBlock, hp, dmg, next.playerPowers)
+          let raw = intent.value + getPower(enemy.powers, 'strength')
+          raw = Math.floor(raw * weakMultiplier(enemy.powers))
+          const result = dealDamageToPlayer(next.playerBlock, hp, raw, next.playerPowers)
           next = { ...next, playerBlock: result.block }
           hp = result.hp
           break

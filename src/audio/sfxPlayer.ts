@@ -1,10 +1,30 @@
-export type SfxId = 'blockGain' | 'dealDamage' | 'takeDamage' | 'blockHit'
+export type SfxId =
+  | 'blockGain'
+  | 'blockDeflect'
+  | 'takeDamageT1'
+  | 'takeDamageT2'
+  | 'takeDamageT3'
+  | 'takeDamageT4'
+  | 'dealDamageT1'
+  | 'dealDamageT2'
+  | 'dealDamageT3'
+  | 'dealDamageT4'
+  | 'cardBash'
+  | 'cardRupture'
 
 const SFX_PATHS: Record<SfxId, string> = {
   blockGain: '/sfx/block-gain.wav',
-  dealDamage: '/sfx/deal-damage.wav',
-  takeDamage: '/sfx/take-damage.wav',
-  blockHit: '/sfx/block-hit.wav',
+  blockDeflect: '/sfx/block-deflect.wav',
+  takeDamageT1: '/sfx/take-damage-t1.wav',
+  takeDamageT2: '/sfx/take-damage-t2.wav',
+  takeDamageT3: '/sfx/take-damage-t3.wav',
+  takeDamageT4: '/sfx/take-damage-t4.wav',
+  dealDamageT1: '/sfx/take-damage-t1.wav',
+  dealDamageT2: '/sfx/take-damage-t2.wav',
+  dealDamageT3: '/sfx/take-damage-t3.wav',
+  dealDamageT4: '/sfx/take-damage-t4.wav',
+  cardBash: '/sfx/card-bash.wav',
+  cardRupture: '/sfx/card-rupture.wav',
 }
 
 let volumeGetter: () => number = () => 0.7
@@ -44,7 +64,11 @@ export function playSfx(id: SfxId, options?: { volumeMultiplier?: number }): voi
 }
 
 export function preloadSfx(): void {
+  const loaded = new Set<string>()
   for (const id of Object.keys(SFX_PATHS) as SfxId[]) {
+    const path = SFX_PATHS[id]
+    if (loaded.has(path)) continue
+    loaded.add(path)
     getAudio(id).load()
   }
 }

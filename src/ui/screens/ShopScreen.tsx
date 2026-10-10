@@ -2,6 +2,7 @@ import { useGame } from '../../context/GameContext'
 import { getRegistry } from '../../game/content/registry'
 import { createCardInstance } from '../../game/models/card'
 import { CardView } from '../components/CardView'
+import { RelicIcon } from '../components/RelicIcon'
 import { RunHud } from '../components/RunHud'
 import styles from './ShopScreen.module.scss'
 
@@ -39,6 +40,7 @@ export function ShopScreen() {
             const relic = registry.relics.get(offer.relicId)
             return (
               <div key={index} className={styles.offer}>
+                <RelicIcon relicId={offer.relicId} size="lg" title={relic?.name} />
                 <div className={styles.relic}>{relic?.name}</div>
                 <p className={styles.desc}>{relic?.description}</p>
                 <button

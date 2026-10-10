@@ -8,10 +8,13 @@ export const ACT1_EVENTS: EventDef[] = [
     choices: [
       {
         label: 'Pray (lose 6 HP)',
-        effects: [{ type: 'add_relic', relicId: 'relic_vial' }],
+        effects: [
+          { type: 'damage_player', amount: 6 },
+          { type: 'add_relic', relicId: 'relic_vial' },
+        ],
       },
       {
-        label: 'Smash the altar',
+        label: 'Smash the altar (take 6 damage)',
         effects: [{ type: 'gold', amount: 45 }, { type: 'damage_player', amount: 6 }],
       },
       {
@@ -26,11 +29,11 @@ export const ACT1_EVENTS: EventDef[] = [
     body: 'A scribe offers a forbidden page in exchange for coin—or blood.',
     choices: [
       {
-        label: 'Pay 50 Gold',
+        label: 'Pay 50 gold',
         effects: [{ type: 'gold', amount: -50 }, { type: 'add_card', cardId: 'arc_rupture' }],
       },
       {
-        label: 'Offer blood (10 HP)',
+        label: 'Offer blood (lose 10 HP)',
         effects: [{ type: 'damage_player', amount: 10 }, { type: 'add_card', cardId: 'arc_channel' }],
       },
       {
@@ -60,11 +63,11 @@ export const ACT1_EVENTS: EventDef[] = [
     body: 'Embers still warm. Rest could steady your hands—or you could push onward.',
     choices: [
       {
-        label: 'Rest (heal 15 HP)',
+        label: 'Rest by the fire',
         effects: [{ type: 'heal_player', amount: 15 }],
       },
       {
-        label: 'Forage (+25 Gold)',
+        label: 'Forage the camp',
         effects: [{ type: 'gold', amount: 25 }],
       },
     ],
@@ -75,11 +78,11 @@ export const ACT1_EVENTS: EventDef[] = [
     body: 'A rune lock clicks when you approach. Force, finesse, or walk away.',
     choices: [
       {
-        label: 'Force it (8 HP)',
+        label: 'Force it (lose 8 HP)',
         effects: [{ type: 'damage_player', amount: 8 }, { type: 'add_relic', relicId: 'relic_embers' }],
       },
       {
-        label: 'Pick the lock (lose random card)',
+        label: 'Pick the lock (lose a random card)',
         effects: [{ type: 'remove_random_card' }, { type: 'gold', amount: 60 }],
       },
       {

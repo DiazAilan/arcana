@@ -1,4 +1,6 @@
 import { getRegistry } from '../../game/content/registry'
+import { RelicIcon } from './RelicIcon'
+import { Tooltip } from './Tooltip'
 import styles from './RelicBar.module.scss'
 
 type Props = { relicIds: string[] }
@@ -12,9 +14,9 @@ export function RelicBar({ relicIds }: Props) {
         const relic = registry.relics.get(id)
         if (!relic) return null
         return (
-          <div key={id} className={styles.relic} title={relic.description}>
-            {relic.name.slice(0, 2)}
-          </div>
+          <Tooltip key={id} title={relic.name} body={relic.description} placement="bottom">
+            <RelicIcon relicId={id} size="sm" />
+          </Tooltip>
         )
       })}
     </div>

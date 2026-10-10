@@ -9,6 +9,7 @@ import { getMaxEnergyFromRelics, getVictoryHealFromRelics, getCombatStartBlock }
 import { rollCardOffers, rollGoldReward, rollRelicOffer } from '../run/rewards'
 import { createShop } from '../run/shop'
 import { applyRunEffects } from '../run/runEffects'
+import { formatRunEffectOutcomes } from '../run/runEffectOutcomes'
 import { REGULAR_ENEMY_IDS } from '../content/act1/enemies'
 import { ACT1_EVENTS, FALLBACK_EVENT_ID } from '../content/act1/events'
 import { ACT1_RELICS } from '../content/act1/relics'
@@ -152,7 +153,7 @@ export function sessionReducer(
           return { run: nextRun, phase: { kind: 'rest' } }
         case 'event': {
           const eventId = rng.pick(ACT1_EVENTS).id ?? FALLBACK_EVENT_ID
-          return { run: nextRun, phase: { kind: 'event', eventId } }
+          return { run: nextRun, phase: { kind: 'event', eventId, outcome: null } }
         }
         default:
           return session
@@ -289,32 +290,59 @@ export function sessionReducer(
       return afterNodeComplete(session)
 
     case 'EVENT_CHOICE': {
-      if (session.phase.kind !== 'event' || !session.run) return session
+      if (session.phase.kind !== 'event' || !session.run || session.phase.outcome) return session
       const def = getRegistry().events.get(session.phase.eventId)
       if (!def) return afterNodeComplete(session)
       const choice = def.choices[action.choiceIndex]
       if (!choice) return session
 
-      // Pay costs upfront for gold-negative effects
       const goldCost = choice.effects
         .filter((e) => e.type === 'gold' && e.amount < 0)
         .reduce((s, e) => s + (e.type === 'gold' ? -e.amount : 0), 0)
       if (session.run.gold < goldCost) return session
 
-      let run = applyRunEffects(session.run, choice.effects, rng)
-
-      // Shrine pray: damage 6 for relic
-      if (session.phase.eventId === 'event_shrine' && action.choiceIndex === 0) {
-        run = { ...run, hp: Math.max(1, run.hp - 6) }
-        if (!run.relics.includes('relic_vial')) {
-          run = { ...run, relics: [...run.relics, 'relic_vial'] }
-        }
-      }
+      const runBefore = session.run
+      let run = applyRunEffects(runBefore, choice.effects, rng)
 
       if (run.hp <= 0) {
         return { run, phase: { kind: 'game_over' } }
       }
-      return afterNodeComplete({ ...session, run })
+
+      let outcome = formatRunEffectOutcomes(choice.effects, runBefore, run)
+      if (outcome.length === 0) {
+        outcome = ['You leave.']
+      }
+
+      return {
+        run,
+        phase: { kind: 'event', eventId: session.phase.eventId, outcome },
+      }
+    }
+
+    case 'EVENT_CONTINUE': {
+      if (session.phase.kind !== 'event' || !session.run || !session.phase.outcome) return session
+      return afterNodeComplete(session)
+    }
+
+    case 'DEV_RELIC_ADD': {
+      if (!import.meta.env.DEV || !session.run) return session
+      if (!getRegistry().relics.has(action.relicId)) return session
+      if (session.run.relics.includes(action.relicId)) return session
+      return {
+        ...session,
+        run: { ...session.run, relics: [...session.run.relics, action.relicId] },
+      }
+    }
+
+    case 'DEV_RELIC_DELETE': {
+      if (!import.meta.env.DEV || !session.run) return session
+      return {
+        ...session,
+        run: {
+          ...session.run,
+          relics: session.run.relics.filter((id) => id !== action.relicId),
+        },
+      }
     }
 
     case 'GO_MAIN_MENU':

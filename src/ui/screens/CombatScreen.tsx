@@ -1,9 +1,22 @@
 import { useEffect, useRef, useState } from 'react'
+import {
+  enemyShakeClass,
+  hpLossTier,
+  playBlockDeflectSfx,
+  playCardBashSfx,
+  playIncomingDamageSfx,
+  playOutgoingDamageSfx,
+  playerShakeClass,
+  shakeIntensityForTier,
+  type ShakeIntensity,
+} from '../../audio/combatSfx'
 import { playSfx } from '../../audio/sfxPlayer'
 import { useGame } from '../../context/GameContext'
 import { getRegistry } from '../../game/content/registry'
+import type { CombatState } from '../../game/combat/combatState'
 import { getCardEffects } from '../../game/combat/applyEffects'
 import { cardHasEnemyTargetDamage, previewEnemyHpAfterCard } from '../../game/combat/cardPreview'
+import { previewPlayerHpAfterEnemyTurn } from '../../game/combat/intents'
 import { BlockBadge } from '../components/BlockBadge'
 import { DiscardPileModal } from '../components/DiscardPileModal'
 import { DrawPileModal } from '../components/DrawPileModal'
@@ -30,9 +43,16 @@ export function CombatScreen() {
   const [draggingIndex, setDraggingIndex] = useState<number | null>(null)
   const [hitFlash, setHitFlash] = useState(false)
   const [damageFloat, setDamageFloat] = useState<number | null>(null)
-  const [enemyHit, setEnemyHit] = useState<{ id: string; seed: number } | null>(null)
+  const [enemyHit, setEnemyHit] = useState<{
+    id: string
+    seed: number
+    shake: ShakeIntensity
+  } | null>(null)
+  const [playerShake, setPlayerShake] = useState<ShakeIntensity | null>(null)
+  const lastPlayedCardRef = useRef<string | null>(null)
+  const prevPlayerPowersRef = useRef<CombatState['playerPowers'] | null>(null)
   const [drawPileFlash, setDrawPileFlash] = useState(false)
-  const [deckOpen, setDeckOpen] = useState(false)
+  const [inventoryOpen, setInventoryOpen] = useState(false)
   const [drawOpen, setDrawOpen] = useState(false)
   const [discardOpen, setDiscardOpen] = useState(false)
 
@@ -63,14 +83,19 @@ export function CombatScreen() {
 
     if (prevTurn != null && combat.turn > prevTurn && prevHp != null && prevBlock != null && prevEnemies) {
       const hpLost = prevHp - run.hp
+      const playerPowersBefore = prevPlayerPowersRef.current ?? combat.playerPowers
       if (hpLost > 0) {
-        playSfx('takeDamage', { volumeMultiplier: Math.min(1.2, 0.75 + hpLost * 0.06) })
+        const tier = hpLossTier(hpLost)
+        playIncomingDamageSfx(hpLost)
+        setPlayerShake(shakeIntensityForTier(tier))
+        window.setTimeout(() => setPlayerShake(null), 600)
       } else if (
         hpLost === 0 &&
-        prevBlock > 0 &&
-        expectedAttackDamageToPlayer(prevEnemies) > 0
+        expectedAttackDamageToPlayer(prevEnemies, playerPowersBefore) > 0
       ) {
-        playSfx('blockHit')
+        playBlockDeflectSfx()
+        setPlayerShake(shakeIntensityForTier(0))
+        window.setTimeout(() => setPlayerShake(null), 280)
       }
     } else if (
       prevBlock != null &&
@@ -85,6 +110,7 @@ export function CombatScreen() {
     prevBlockRef.current = combat.playerBlock
     prevTurnRef.current = combat.turn
     prevEnemiesRef.current = combat.enemies
+    prevPlayerPowersRef.current = combat.playerPowers
   }, [combat, hp, inCombat, run])
 
   useEffect(() => {
@@ -96,6 +122,9 @@ export function CombatScreen() {
     const delta = prev - run.hp
     setHitFlash(true)
     setDamageFloat(delta)
+    const tier = hpLossTier(delta)
+    setPlayerShake(shakeIntensityForTier(tier))
+    window.setTimeout(() => setPlayerShake(null), 600)
     const t1 = window.setTimeout(() => setHitFlash(false), 450)
     const t2 = window.setTimeout(() => setDamageFloat(null), 900)
     return () => {
@@ -111,9 +140,14 @@ export function CombatScreen() {
     for (const enemy of combat.enemies) {
       const prevEnemyHp = prevMap.get(enemy.instanceId)
       if (prevEnemyHp != null && enemy.hp < prevEnemyHp) {
-        playSfx('dealDamage')
-        setEnemyHit({ id: enemy.instanceId, seed: Date.now() })
-        window.setTimeout(() => setEnemyHit((h) => (h?.id === enemy.instanceId ? null : h)), 400)
+        const hpLost = prevEnemyHp - enemy.hp
+        const cardDefId = lastPlayedCardRef.current ?? undefined
+        playOutgoingDamageSfx(hpLost, cardDefId)
+        lastPlayedCardRef.current = null
+        const tier = hpLossTier(hpLost)
+        const shake = shakeIntensityForTier(tier)
+        setEnemyHit({ id: enemy.instanceId, seed: Date.now(), shake })
+        window.setTimeout(() => setEnemyHit((h) => (h?.id === enemy.instanceId ? null : h)), 450)
       }
       prevMap.set(enemy.instanceId, enemy.hp)
     }
@@ -146,7 +180,7 @@ export function CombatScreen() {
 
       if (e.code === 'KeyD' && !e.repeat) {
         e.preventDefault()
-        setDeckOpen(false)
+        setInventoryOpen(false)
         setDiscardOpen(false)
         setDrawOpen((open) => !open)
         return
@@ -154,24 +188,24 @@ export function CombatScreen() {
 
       if (e.code === 'KeyF' && !e.repeat) {
         e.preventDefault()
-        setDeckOpen(false)
+        setInventoryOpen(false)
         setDrawOpen(false)
         setDiscardOpen((open) => !open)
         return
       }
 
       if (e.key === 'Escape') {
-        if (drawOpen || discardOpen || deckOpen) {
+        if (drawOpen || discardOpen || inventoryOpen) {
           e.preventDefault()
           setDrawOpen(false)
           setDiscardOpen(false)
-          setDeckOpen(false)
+          setInventoryOpen(false)
         }
       }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [canPlay, deckOpen, discardOpen, dispatch, drawOpen, inCombat])
+  }, [canPlay, inventoryOpen, discardOpen, dispatch, drawOpen, inCombat])
 
   useEffect(() => {
     if (!inCombat) {
@@ -187,6 +221,10 @@ export function CombatScreen() {
     if (!card || !canPlay) return
     const def = getRegistry().cards.get(card.defId)
     if (!def || combat.energy < def.cost) return
+    lastPlayedCardRef.current = card.defId
+    if (card.defId === 'arc_bash') {
+      playCardBashSfx()
+    }
     dispatch({
       type: 'COMBAT',
       action: { type: 'PLAY_CARD', handIndex, targetEnemyIndex: targetEnemyIndex ?? 0 },
@@ -207,25 +245,35 @@ export function CombatScreen() {
     return previewEnemyHpAfterCard(enemy, combat, draggedEffects, enemyIndex)
   }
 
+  const playerHpAfterTurn =
+    canPlay ? previewPlayerHpAfterEnemyTurn(combat, run.hp) : null
+
   const openDraw = () => {
-    setDeckOpen(false)
+    setInventoryOpen(false)
     setDiscardOpen(false)
     setDrawOpen(true)
   }
 
   const openDiscard = () => {
-    setDeckOpen(false)
+    setInventoryOpen(false)
     setDrawOpen(false)
     setDiscardOpen(true)
   }
 
-  const onDeckOpenChange = (open: boolean) => {
+  const onInventoryOpenChange = (open: boolean) => {
     if (open) {
       setDrawOpen(false)
       setDiscardOpen(false)
     }
-    setDeckOpen(open)
+    setInventoryOpen(open)
   }
+
+  const playerShakeStyle =
+    playerShake != null
+      ? styles[playerShakeClass(playerShake) as keyof typeof styles]
+      : hitFlash
+        ? styles.playerShakeMedium
+        : ''
 
   return (
     <div className={`${styles.combat} ${hitFlash ? styles.hitFlash : ''}`}>
@@ -233,9 +281,9 @@ export function CombatScreen() {
         run={run}
         center={<span className={styles.encounter}>{encounter}</span>}
         trailing={<EnergyOrb current={combat.energy} max={combat.maxEnergy} />}
-        deckOpen={deckOpen}
-        onDeckOpenChange={onDeckOpenChange}
-        deckFooterNote="Master deck — cards split across draw, hand, and discard during combat"
+        inventoryOpen={inventoryOpen}
+        onInventoryOpenChange={onInventoryOpenChange}
+        inventoryFooterNote="Master deck — cards split across draw, hand, and discard during combat"
       />
 
       <div className={styles.enemies}>
@@ -243,13 +291,16 @@ export function CombatScreen() {
           const def = getRegistry().enemies.get(enemy.defId)
           const isDropTarget = dragOverEnemy === enemyIndex
           const shaking = enemyHit?.id === enemy.instanceId
+          const enemyShakeStyle = shaking
+            ? styles[enemyShakeClass(enemyHit.shake) as keyof typeof styles]
+            : ''
           return (
             <div
               key={enemy.instanceId}
-              className={`${styles.enemy} ${isDropTarget ? styles.enemyDropTarget : ''} ${shaking ? styles.enemyShake : ''}`}
+              className={`${styles.enemy} ${isDropTarget ? styles.enemyDropTarget : ''} ${enemyShakeStyle}`}
               data-enemy-drop={enemyIndex}
             >
-              <IntentIcon enemy={enemy} />
+              <IntentIcon enemy={enemy} playerPowers={combat.playerPowers} />
               <HitParticles active={shaking} seed={enemyHit?.seed ?? 0} />
               <EnemyArt defId={enemy.defId} artKey={def?.artKey} />
               <h3>{def?.name ?? enemy.defId}</h3>
@@ -267,9 +318,15 @@ export function CombatScreen() {
         </div>
 
         <div className={styles.playerDock}>
-        <div className={`${styles.playerZone} ${hitFlash ? styles.playerShake : ''}`}>
+        <div className={`${styles.playerZone} ${playerShakeStyle}`}>
           <div className={styles.playerMain}>
-            <HpBar hp={run.hp} maxHp={run.maxHp} label="You" />
+            <HpBar
+              hp={run.hp}
+              maxHp={run.maxHp}
+              label="You"
+              previewHp={playerHpAfterTurn}
+              size="large"
+            />
             {damageFloat != null ? <span className={styles.damageFloat}>−{damageFloat}</span> : null}
             <PowerRow powers={combat.playerPowers} />
             <div className={`${styles.piles} ${drawPileFlash ? styles.pilesFlash : ''}`}>
@@ -281,15 +338,15 @@ export function CombatScreen() {
                 Discard {combat.discardPile.length} · F
               </button>
             </div>
-            <button
-              type="button"
-              className="btnPrimary"
-              disabled={!canPlay}
-              onClick={() => dispatch({ type: 'COMBAT', action: { type: 'END_TURN' } })}
-            >
-              End Turn (Space)
-            </button>
           </div>
+          <button
+            type="button"
+            className={`btnPrimary ${styles.endTurnBtn}`}
+            disabled={!canPlay}
+            onClick={() => dispatch({ type: 'COMBAT', action: { type: 'END_TURN' } })}
+          >
+            End Turn (Space)
+          </button>
         </div>
 
         <Hand
@@ -305,7 +362,9 @@ export function CombatScreen() {
         </div>
       </div>
 
-      {drawOpen ? <DrawPileModal count={combat.drawPile.length} onClose={() => setDrawOpen(false)} /> : null}
+      {drawOpen ? (
+        <DrawPileModal drawPile={combat.drawPile} onClose={() => setDrawOpen(false)} />
+      ) : null}
       {discardOpen ? (
         <DiscardPileModal discardPile={combat.discardPile} onClose={() => setDiscardOpen(false)} />
       ) : null}

@@ -7,7 +7,6 @@
 
 .panel {
   position: absolute;
-  bottom: calc(100% + 6px);
   left: 50%;
   transform: translateX(-50%);
   min-width: 160px;
@@ -25,6 +24,14 @@
   opacity: 0;
   visibility: hidden;
   transition: opacity 0.12s ease, visibility 0.12s ease;
+}
+
+.panelTop {
+  bottom: calc(100% + 6px);
+}
+
+.panelBottom {
+  top: calc(100% + 6px);
 }
 
 .title {

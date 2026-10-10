@@ -85,8 +85,57 @@
   white-space: pre;
 }
 
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid $border-subtle;
+  background: rgba(0, 0, 0, 0.2);
+  color: $text-muted;
+  border-radius: $radius-md;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    color: $text-primary;
+    border-color: rgba($accent-magic, 0.35);
+  }
+}
+
+.tabActive {
+  color: $text-primary;
+  border-color: rgba($accent-magic, 0.55);
+  box-shadow: 0 0 0 1px rgba($accent-magic, 0.25);
+  background: rgba($accent-magic, 0.12);
+}
+
+.tabCount {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: $accent-gold;
+  font-variant-numeric: tabular-nums;
+}
+
 .hint {
   font-size: 0.75rem;
   color: $text-muted;
   margin-bottom: 1rem;
+}
+
+.id {
+  display: block;
+  font-size: 0.65rem;
+  font-weight: 500;
+  color: $text-muted;
+  font-family: ui-monospace, monospace;
+  margin-top: 0.15rem;
 }
