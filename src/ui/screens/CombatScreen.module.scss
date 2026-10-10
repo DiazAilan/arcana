@@ -123,16 +123,6 @@
   }
 }
 
-.enemyFlavor {
-  margin: -0.15rem 0 0;
-  max-width: 14rem;
-  font-size: 0.72rem;
-  line-height: 1.35;
-  text-align: center;
-  color: $text-muted;
-  font-style: italic;
-}
-
 .enemyDropTarget {
   border-color: rgba($accent-magic, 0.75);
   box-shadow: 0 0 0 3px rgba($accent-magic, 0.25);
