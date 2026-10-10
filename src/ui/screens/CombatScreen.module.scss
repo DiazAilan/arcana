@@ -104,6 +104,31 @@
   font-size: 0.8rem;
   color: $text-muted;
   transition: color 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.pileBtn {
+  border: none;
+  background: none;
+  padding: 0;
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  text-decoration: underline;
+  text-decoration-color: rgba($text-muted, 0.45);
+  text-underline-offset: 2px;
+
+  &:hover {
+    color: $text-primary;
+  }
+}
+
+.pileSep {
+  opacity: 0.6;
 }
 
 .pilesFlash {

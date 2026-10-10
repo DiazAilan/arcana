@@ -1,3 +1,5 @@
+import { getCardEffects } from '../../game/combat/applyEffects'
+import { getCardBaseStats } from '../../game/combat/cardPreview'
 import type { CardInstance } from '../../game/models/card'
 import { CardView } from './CardView'
 import styles from './UpgradeConfirmModal.module.scss'
@@ -11,6 +13,8 @@ type Props = {
 
 export function UpgradeConfirmModal({ card, onConfirm, onChooseAnother, onRestInstead }: Props) {
   const preview: CardInstance = { ...card, upgraded: true }
+  const baseStats = getCardBaseStats(getCardEffects(card.defId, false))
+  const upgradedStats = getCardBaseStats(getCardEffects(card.defId, true))
 
   return (
     <div className={styles.backdrop} role="presentation" onClick={onChooseAnother}>
@@ -19,11 +23,16 @@ export function UpgradeConfirmModal({ card, onConfirm, onChooseAnother, onRestIn
         <div className={styles.cards}>
           <div className={styles.col}>
             <span>Current</span>
-            <CardView card={card} />
+            <CardView card={card} statMode="base" baseStats={baseStats} />
           </div>
           <div className={styles.col}>
             <span>Upgraded</span>
-            <CardView card={preview} />
+            <CardView
+              card={preview}
+              statMode="upgradeCompare"
+              baseStats={upgradedStats}
+              upgradeCompareBaseStats={baseStats}
+            />
           </div>
         </div>
         <div className={styles.actions}>

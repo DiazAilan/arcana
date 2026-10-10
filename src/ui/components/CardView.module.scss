@@ -97,8 +97,14 @@
   font-variant-numeric: tabular-nums;
 }
 
+.costImproved {
+  color: $accent-heal;
+  font-weight: 800;
+}
+
 .effectBuff {
   color: $accent-heal;
+  font-weight: 800;
 }
 
 .effectDebuff {

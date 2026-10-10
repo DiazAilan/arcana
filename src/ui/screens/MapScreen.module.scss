@@ -29,24 +29,57 @@
   margin: 0;
 }
 
+.gridWrap {
+  flex: 1;
+  max-width: 420px;
+  margin: 0 auto;
+  width: 100%;
+  display: flex;
+  align-items: stretch;
+}
+
+.edges {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  z-index: 0;
+  overflow: visible;
+}
+
+.edgeDim {
+  stroke: rgba($text-muted, 0.18);
+  stroke-width: 1.5;
+  vector-effect: non-scaling-stroke;
+}
+
+.edgeBright {
+  stroke: rgba($accent-magic, 0.7);
+  stroke-width: 2.5;
+  vector-effect: non-scaling-stroke;
+}
+
 .grid {
+  position: relative;
   flex: 1;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  grid-template-rows: repeat(8, minmax(48px, 1fr));
-  gap: 0.5rem;
-  max-width: 420px;
-  margin: 0 auto;
+  grid-template-rows: repeat(8, minmax(44px, 1fr));
+  gap: 0.65rem;
   width: 100%;
 }
 
 .node {
+  place-self: center;
+  width: min(72%, 5.5rem);
+  height: min(68%, 2.35rem);
+  max-height: 2.35rem;
   border-radius: $radius-md;
   border: 1px solid $border-subtle;
   background: $bg-card;
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   font-weight: 600;
   opacity: 0.35;
+  padding: 0.15rem 0.25rem;
 
   &.available {
     opacity: 1;
@@ -56,6 +89,10 @@
     &:hover {
       filter: brightness(1.1);
     }
+  }
+
+  &.startOption {
+    box-shadow: 0 0 0 2px rgba($accent-gold, 0.55);
   }
 
   &.cleared:not(.available) {

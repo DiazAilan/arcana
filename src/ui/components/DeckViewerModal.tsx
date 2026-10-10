@@ -6,9 +6,10 @@ import styles from './DeckViewerModal.module.scss'
 type Props = {
   deck: CardInstance[]
   onClose: () => void
+  footerNote?: string
 }
 
-export function DeckViewerModal({ deck, onClose }: Props) {
+export function DeckViewerModal({ deck, onClose, footerNote }: Props) {
   const groups = groupDeck(deck)
 
   return (
@@ -36,7 +37,10 @@ export function DeckViewerModal({ deck, onClose }: Props) {
             ))}
           </div>
         </div>
-        <p className={styles.footer}>{deck.length} cards total</p>
+        <p className={styles.footer}>
+          {footerNote ? `${footerNote} · ` : null}
+          {deck.length} cards total
+        </p>
       </div>
     </div>
   )

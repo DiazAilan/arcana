@@ -1,9 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
+import { playSfx } from '../../audio/sfxPlayer'
 import { useGame } from '../../context/GameContext'
 import { getRegistry } from '../../game/content/registry'
 import { getCardEffects } from '../../game/combat/applyEffects'
 import { cardHasEnemyTargetDamage, previewEnemyHpAfterCard } from '../../game/combat/cardPreview'
 import { BlockBadge } from '../components/BlockBadge'
+import { DiscardPileModal } from '../components/DiscardPileModal'
+import { DrawPileModal } from '../components/DrawPileModal'
 import { EnemyArt } from '../components/EnemyArt'
 import { EnergyOrb } from '../components/EnergyOrb'
 import { Hand } from '../components/Hand'
@@ -12,7 +15,14 @@ import { HpBar } from '../components/HpBar'
 import { IntentIcon } from '../components/IntentIcon'
 import { PowerRow } from '../components/PowerRow'
 import { RunHud } from '../components/RunHud'
+import type { EnemyInstance } from '../../game/models/enemy'
+import { expectedAttackDamageToPlayer } from '../combat/expectedPlayerDamage'
 import styles from './CombatScreen.module.scss'
+
+function isTypingTarget(e: KeyboardEvent): boolean {
+  const tag = (e.target as HTMLElement)?.tagName
+  return tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'BUTTON'
+}
 
 export function CombatScreen() {
   const { session, dispatch } = useGame()
@@ -22,9 +32,17 @@ export function CombatScreen() {
   const [damageFloat, setDamageFloat] = useState<number | null>(null)
   const [enemyHit, setEnemyHit] = useState<{ id: string; seed: number } | null>(null)
   const [drawPileFlash, setDrawPileFlash] = useState(false)
-  const prevHpRef = useRef<number | null>(null)
+  const [deckOpen, setDeckOpen] = useState(false)
+  const [drawOpen, setDrawOpen] = useState(false)
+  const [discardOpen, setDiscardOpen] = useState(false)
+
+  const prevHpSfxRef = useRef<number | null>(null)
+  const prevHpVisualRef = useRef<number | null>(null)
   const prevEnemyHpRef = useRef<Map<string, number>>(new Map())
   const prevDrawPileLenRef = useRef<number | null>(null)
+  const prevBlockRef = useRef<number | null>(null)
+  const prevTurnRef = useRef<number | null>(null)
+  const prevEnemiesRef = useRef<EnemyInstance[] | null>(null)
 
   const phase = session.phase
   const inCombat = phase.kind === 'combat' && session.run != null
@@ -36,9 +54,43 @@ export function CombatScreen() {
   const hp = run?.hp ?? 0
 
   useEffect(() => {
+    if (!inCombat || !run || !combat) return
+
+    const prevHp = prevHpSfxRef.current
+    const prevBlock = prevBlockRef.current
+    const prevTurn = prevTurnRef.current
+    const prevEnemies = prevEnemiesRef.current
+
+    if (prevTurn != null && combat.turn > prevTurn && prevHp != null && prevBlock != null && prevEnemies) {
+      const hpLost = prevHp - run.hp
+      if (hpLost > 0) {
+        playSfx('takeDamage', { volumeMultiplier: Math.min(1.2, 0.75 + hpLost * 0.06) })
+      } else if (
+        hpLost === 0 &&
+        prevBlock > 0 &&
+        expectedAttackDamageToPlayer(prevEnemies) > 0
+      ) {
+        playSfx('blockHit')
+      }
+    } else if (
+      prevBlock != null &&
+      combat.playerBlock > prevBlock &&
+      prevTurn === combat.turn &&
+      combat.phase === 'player'
+    ) {
+      playSfx('blockGain')
+    }
+
+    prevHpSfxRef.current = run.hp
+    prevBlockRef.current = combat.playerBlock
+    prevTurnRef.current = combat.turn
+    prevEnemiesRef.current = combat.enemies
+  }, [combat, hp, inCombat, run])
+
+  useEffect(() => {
     if (!inCombat || !run) return
-    const prev = prevHpRef.current
-    prevHpRef.current = run.hp
+    const prev = prevHpVisualRef.current
+    prevHpVisualRef.current = run.hp
     if (prev == null || run.hp >= prev) return
 
     const delta = prev - run.hp
@@ -57,8 +109,9 @@ export function CombatScreen() {
 
     const prevMap = prevEnemyHpRef.current
     for (const enemy of combat.enemies) {
-      const prevHp = prevMap.get(enemy.instanceId)
-      if (prevHp != null && enemy.hp < prevHp) {
+      const prevEnemyHp = prevMap.get(enemy.instanceId)
+      if (prevEnemyHp != null && enemy.hp < prevEnemyHp) {
+        playSfx('dealDamage')
         setEnemyHit({ id: enemy.instanceId, seed: Date.now() })
         window.setTimeout(() => setEnemyHit((h) => (h?.id === enemy.instanceId ? null : h)), 400)
       }
@@ -80,16 +133,52 @@ export function CombatScreen() {
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.code !== 'Space' && e.key !== ' ') return
-      const tag = (e.target as HTMLElement)?.tagName
-      if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'BUTTON') return
-      if (!canPlay) return
-      e.preventDefault()
-      dispatch({ type: 'COMBAT', action: { type: 'END_TURN' } })
+      if (isTypingTarget(e)) return
+
+      if (e.code === 'Space' || e.key === ' ') {
+        if (!canPlay) return
+        e.preventDefault()
+        dispatch({ type: 'COMBAT', action: { type: 'END_TURN' } })
+        return
+      }
+
+      if (!inCombat) return
+
+      if (e.code === 'KeyD' && !e.repeat) {
+        e.preventDefault()
+        setDeckOpen(false)
+        setDiscardOpen(false)
+        setDrawOpen((open) => !open)
+        return
+      }
+
+      if (e.code === 'KeyF' && !e.repeat) {
+        e.preventDefault()
+        setDeckOpen(false)
+        setDrawOpen(false)
+        setDiscardOpen((open) => !open)
+        return
+      }
+
+      if (e.key === 'Escape') {
+        if (drawOpen || discardOpen || deckOpen) {
+          e.preventDefault()
+          setDrawOpen(false)
+          setDiscardOpen(false)
+          setDeckOpen(false)
+        }
+      }
     }
     window.addEventListener('keydown', onKeyDown)
     return () => window.removeEventListener('keydown', onKeyDown)
-  }, [canPlay, dispatch])
+  }, [canPlay, deckOpen, discardOpen, dispatch, drawOpen, inCombat])
+
+  useEffect(() => {
+    if (!inCombat) {
+      setDrawOpen(false)
+      setDiscardOpen(false)
+    }
+  }, [inCombat])
 
   if (!inCombat || !combat || !encounter || !run) return null
 
@@ -118,12 +207,35 @@ export function CombatScreen() {
     return previewEnemyHpAfterCard(enemy, combat, draggedEffects, enemyIndex)
   }
 
+  const openDraw = () => {
+    setDeckOpen(false)
+    setDiscardOpen(false)
+    setDrawOpen(true)
+  }
+
+  const openDiscard = () => {
+    setDeckOpen(false)
+    setDrawOpen(false)
+    setDiscardOpen(true)
+  }
+
+  const onDeckOpenChange = (open: boolean) => {
+    if (open) {
+      setDrawOpen(false)
+      setDiscardOpen(false)
+    }
+    setDeckOpen(open)
+  }
+
   return (
     <div className={`${styles.combat} ${hitFlash ? styles.hitFlash : ''}`}>
       <RunHud
         run={run}
         center={<span className={styles.encounter}>{encounter}</span>}
         trailing={<EnergyOrb current={combat.energy} max={combat.maxEnergy} />}
+        deckOpen={deckOpen}
+        onDeckOpenChange={onDeckOpenChange}
+        deckFooterNote="Master deck — cards split across draw, hand, and discard during combat"
       />
 
       <div className={styles.enemies}>
@@ -161,7 +273,13 @@ export function CombatScreen() {
             {damageFloat != null ? <span className={styles.damageFloat}>−{damageFloat}</span> : null}
             <PowerRow powers={combat.playerPowers} />
             <div className={`${styles.piles} ${drawPileFlash ? styles.pilesFlash : ''}`}>
-              Draw {combat.drawPile.length} · Discard {combat.discardPile.length}
+              <button type="button" className={styles.pileBtn} onClick={openDraw}>
+                Draw {combat.drawPile.length} · D
+              </button>
+              <span className={styles.pileSep}>·</span>
+              <button type="button" className={styles.pileBtn} onClick={openDiscard}>
+                Discard {combat.discardPile.length} · F
+              </button>
             </div>
             <button
               type="button"
@@ -186,6 +304,11 @@ export function CombatScreen() {
         />
         </div>
       </div>
+
+      {drawOpen ? <DrawPileModal count={combat.drawPile.length} onClose={() => setDrawOpen(false)} /> : null}
+      {discardOpen ? (
+        <DiscardPileModal discardPile={combat.discardPile} onClose={() => setDiscardOpen(false)} />
+      ) : null}
     </div>
   )
 }

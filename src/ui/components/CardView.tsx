@@ -3,7 +3,11 @@ import { getCardSprite } from '../../game/content/art/sprites'
 import type { CardBaseStat, CardStatPreview } from '../../game/combat/cardPreview'
 import type { CardInstance } from '../../game/models/card'
 import { CardDescriptionText } from './CardDescriptionText'
-import { descriptionWithBaseStats, descriptionWithCombatStats } from './cardDescriptionDisplay'
+import {
+  descriptionWithBaseStats,
+  descriptionWithCombatStats,
+  descriptionWithUpgradeHighlight,
+} from './cardDescriptionDisplay'
 import { PixelSprite } from './PixelSprite'
 import styles from './CardView.module.scss'
 
@@ -16,9 +20,11 @@ type Props = {
   dragging?: boolean
   onPointerDown?: (e: React.PointerEvent) => void
   onContextMenu?: (e: React.MouseEvent) => void
-  statMode?: 'combat' | 'base' | 'none'
+  statMode?: 'combat' | 'base' | 'none' | 'upgradeCompare'
   statPreviews?: CardStatPreview[]
   baseStats?: CardBaseStat[]
+  /** Base card stats when statMode is upgradeCompare */
+  upgradeCompareBaseStats?: CardBaseStat[]
 }
 
 export function CardView({
@@ -32,11 +38,18 @@ export function CardView({
   statMode = 'none',
   statPreviews,
   baseStats,
+  upgradeCompareBaseStats,
 }: Props) {
   const def = getRegistry().cards.get(card.defId)
   if (!def) return null
 
   const description = card.upgraded && def.upgrade ? def.upgrade.description : def.description
+  const displayCost =
+    card.upgraded && def.upgrade?.cost != null ? def.upgrade.cost : def.cost
+  const costImproved =
+    card.upgraded &&
+    def.upgrade?.cost != null &&
+    def.upgrade.cost < def.cost
   const typeClass = styles[def.type] ?? ''
   const artKey = def.artKey ?? def.id
   const sprite = getCardSprite(artKey, def.type)
@@ -46,6 +59,14 @@ export function CardView({
       <CardDescriptionText parts={descriptionWithCombatStats(description, statPreviews)} />
     ) : statMode === 'base' && baseStats && baseStats.length > 0 ? (
       <CardDescriptionText parts={descriptionWithBaseStats(description, baseStats)} />
+    ) : statMode === 'upgradeCompare' &&
+      baseStats &&
+      baseStats.length > 0 &&
+      upgradeCompareBaseStats &&
+      upgradeCompareBaseStats.length > 0 ? (
+      <CardDescriptionText
+        parts={descriptionWithUpgradeHighlight(description, baseStats, upgradeCompareBaseStats)}
+      />
     ) : (
       <p className={styles.desc}>{description}</p>
     )
@@ -60,8 +81,11 @@ export function CardView({
       onContextMenu={onContextMenu}
     >
       <div className={styles.costRow}>
-        <div className={styles.cost} aria-label={`Cost ${def.cost}`}>
-          {def.cost}
+        <div
+          className={`${styles.cost} ${costImproved ? styles.costImproved : ''}`}
+          aria-label={`Cost ${displayCost}`}
+        >
+          {displayCost}
         </div>
       </div>
       <div className={styles.art}>

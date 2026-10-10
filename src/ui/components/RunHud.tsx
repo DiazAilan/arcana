@@ -3,6 +3,7 @@ import type { RunState } from '../../game/models/session'
 import { HpBar } from './HpBar'
 import { RelicBar } from './RelicBar'
 import { DeckViewerModal } from './DeckViewerModal'
+import { SettingsModal } from './SettingsModal'
 import styles from './RunHud.module.scss'
 
 type Props = {
@@ -12,6 +13,8 @@ type Props = {
   showDeck?: boolean
   deckOpen?: boolean
   onDeckOpenChange?: (open: boolean) => void
+  /** Shown in deck modal footer (e.g. during combat). */
+  deckFooterNote?: string
 }
 
 export function RunHud({
@@ -21,8 +24,10 @@ export function RunHud({
   showDeck = true,
   deckOpen: deckOpenProp,
   onDeckOpenChange,
+  deckFooterNote,
 }: Props) {
   const [deckOpenInternal, setDeckOpenInternal] = useState(false)
+  const [settingsOpen, setSettingsOpen] = useState(false)
   const deckOpen = deckOpenProp ?? deckOpenInternal
 
   const setDeckOpen = (open: boolean) => {
@@ -32,7 +37,7 @@ export function RunHud({
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.code !== 'KeyD' || e.repeat) return
+      if (e.code !== 'KeyI' || e.repeat) return
       const tag = (e.target as HTMLElement)?.tagName
       if (tag === 'INPUT' || tag === 'TEXTAREA') return
       if (!showDeck) return
@@ -53,13 +58,28 @@ export function RunHud({
         <div className={styles.right}>
           {showDeck ? (
             <button type="button" className="btnGhost" onClick={() => setDeckOpen(!deckOpen)}>
-              Deck ({run.deck.length}) · D
+              Deck ({run.deck.length}) · I
             </button>
           ) : null}
+          <button
+            type="button"
+            className={styles.settingsBtn}
+            aria-label="Settings"
+            onClick={() => setSettingsOpen(true)}
+          >
+            ⚙
+          </button>
           {trailing}
         </div>
       </header>
-      {deckOpen ? <DeckViewerModal deck={run.deck} onClose={() => setDeckOpen(false)} /> : null}
+      {deckOpen ? (
+        <DeckViewerModal
+          deck={run.deck}
+          footerNote={deckFooterNote}
+          onClose={() => setDeckOpen(false)}
+        />
+      ) : null}
+      {settingsOpen ? <SettingsModal onClose={() => setSettingsOpen(false)} /> : null}
     </>
   )
 }

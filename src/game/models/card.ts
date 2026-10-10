@@ -12,6 +12,7 @@ export type CardDef = {
   upgrade?: {
     description: string
     effects: CombatEffect[]
+    cost?: number
   }
 }
 

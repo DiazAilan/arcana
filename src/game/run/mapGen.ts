@@ -56,16 +56,17 @@ export function generateMap(rng: SeededRNG): MapState {
   const boss = nodes.find((n) => n.id === bossNodeId)!
   boss.type = 'boss'
 
-  const startNodeId = nodeId(0, rng.nextInt(COLS))
-  const start = nodes.find((n) => n.id === startNodeId)!
-  start.type = 'battle'
+  const row0 = nodes.filter((n) => n.row === 0)
+  for (const n of row0) {
+    n.type = 'battle'
+  }
 
   return {
     nodes,
-    startNodeId: start.id,
+    startNodeId: row0[0]!.id,
     bossNodeId: boss.id,
     clearedNodeIds: [],
-    availableNodeIds: [start.id],
+    availableNodeIds: row0.map((n) => n.id),
   }
 }
 

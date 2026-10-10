@@ -89,3 +89,53 @@ export function descriptionWithBaseStats(description: string, stats: CardBaseSta
   }
   return parts
 }
+
+function baseStatValueAt(stats: CardBaseStat[], kind: CardBaseStat['kind'], index: number): number | undefined {
+  let seen = 0
+  for (const stat of stats) {
+    if (stat.kind !== kind) continue
+    if (seen === index) return stat.value
+    seen += 1
+  }
+  return undefined
+}
+
+function applyUpgradeCompareStat(
+  parts: DescriptionPart[],
+  stat: CardBaseStat,
+  baseStats: CardBaseStat[],
+  kindIndex: number,
+): DescriptionPart[] {
+  const baseVal = baseStatValueAt(baseStats, stat.kind, kindIndex)
+  const improved = baseVal != null && stat.value > baseVal
+  const statPart: DescriptionPart = {
+    kind: 'stat',
+    symbol: stat.symbol,
+    value: stat.value,
+    buff: improved,
+    debuff: false,
+  }
+  for (const phrase of phrasesForStat(stat.kind, stat.value)) {
+    const next = parts.flatMap((p) => splitPart(p, phrase, statPart))
+    if (next.length !== parts.length || next.some((p, i) => p !== parts[i])) {
+      return next
+    }
+  }
+  return parts
+}
+
+/** Highlight upgraded stat numbers that beat the base card (green/bold via CardDescriptionText). */
+export function descriptionWithUpgradeHighlight(
+  upgradedDescription: string,
+  upgradedStats: CardBaseStat[],
+  baseStats: CardBaseStat[],
+): DescriptionPart[] {
+  let parts: DescriptionPart[] = [{ kind: 'text', text: upgradedDescription }]
+  const kindCounters: Partial<Record<CardBaseStat['kind'], number>> = {}
+  for (const stat of upgradedStats) {
+    const idx = kindCounters[stat.kind] ?? 0
+    kindCounters[stat.kind] = idx + 1
+    parts = applyUpgradeCompareStat(parts, stat, baseStats, idx)
+  }
+  return parts
+}

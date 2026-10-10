@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { useGame } from '../../context/GameContext'
 import { getRegistry } from '../../game/content/registry'
+import { CardUpgradeCompareModal } from '../components/CardUpgradeCompareModal'
 import { CardView } from '../components/CardView'
 import { RunHud } from '../components/RunHud'
 import { createCardInstance } from '../../game/models/card'
@@ -7,6 +9,7 @@ import styles from './RewardScreen.module.scss'
 
 export function RewardScreen() {
   const { session, dispatch } = useGame()
+  const [compareDefId, setCompareDefId] = useState<string | null>(null)
   if (session.phase.kind !== 'reward' || !session.run) return null
 
   const { cardOffers, gold, relicOffer, cardResolved } = session.phase
@@ -24,16 +27,23 @@ export function RewardScreen() {
 
       {!cardResolved ? (
         <>
-          <p className={styles.label}>Choose a card</p>
+          <p className={styles.label}>Choose a card · right-click to preview upgrade</p>
           <div className={styles.cards}>
             {cardOffers.map((id) => (
               <CardView
                 key={id}
                 card={createCardInstance(id)}
                 onClick={() => dispatch({ type: 'REWARD_PICK_CARD', cardId: id })}
+                onContextMenu={(e) => {
+                  e.preventDefault()
+                  setCompareDefId(id)
+                }}
               />
             ))}
           </div>
+          {compareDefId ? (
+            <CardUpgradeCompareModal defId={compareDefId} onClose={() => setCompareDefId(null)} />
+          ) : null}
           <button type="button" className="btnGhost" onClick={() => dispatch({ type: 'REWARD_SKIP_CARD' })}>
             Skip card
           </button>
