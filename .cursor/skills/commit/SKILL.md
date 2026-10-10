@@ -2,7 +2,7 @@
 name: commit
 description: >-
   Create git commits in this repo using semantic commit messages
-  (feature:, fix:, chore:, etc.). Use when the user asks to commit,
+  (feat:, fix:, chore:, etc.). Use when the user asks to commit,
   save work, or write a commit message.
 ---
 
@@ -23,22 +23,20 @@ Follow this convention for every commit in this repository.
 
 | Type | When to use |
 |------|-------------|
-| `feature:` | New user-facing behavior or capability |
+| `feat:` | New user-facing behavior or capability |
 | `fix:` | Bug fix or incorrect behavior |
 | `chore:` | Tooling, CI, deps, config, no product change |
-| `refactor:` | Code change that is not a fix or feature |
+| `refactor:` | Code change that is not a fix or feat |
 | `test:` | Tests only |
 | `docs:` | Documentation only |
-
-`feat:` is acceptable as an alias for `feature:`; prefer **`feature:`** in this repo.
 
 ### Examples
 
 ```
-feature: add deck viewer during combat
+feat: add deck viewer during combat
 fix: prevent playing targeted cards without an enemy drop
 chore: bump vite to 8.3
-feature: show player debuffs and block in combat HUD
+feat: show player debuffs and block in combat HUD
 ```
 
 ### Body (optional)
@@ -46,7 +44,7 @@ feature: show player debuffs and block in combat HUD
 Add a blank line and short bullets when the change spans several areas:
 
 ```
-feature: improve combat and run UX from playtest
+feat: improve combat and run UX from playtest
 
 Add power/block badges, grouped deck modal, drag-and-drop card play,
 hit feedback, and pixel art for cards and enemies.
@@ -61,7 +59,7 @@ hit feedback, and pixel art for cards and enemies.
 
 ```bash
 git commit -m "$(cat <<'EOF'
-feature: verb + result
+feat: verb + result
 
 Optional body.
 

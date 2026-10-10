@@ -6,6 +6,6 @@ export default defineConfig(({ mode }) => ({
   base: mode === 'production' ? '/arcana/' : '/',
   plugins: [react()],
   test: {
-    include: ['src/game/**/*.test.ts'],
+    include: ['src/**/*.test.ts'],
   },
 }))

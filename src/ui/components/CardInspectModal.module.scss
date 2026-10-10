@@ -1,0 +1,37 @@
+@use '../../styles/variables' as *;
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.65);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 110;
+  padding: 1rem;
+}
+
+.panel {
+  background: $bg-panel;
+  border: 1px solid $border-subtle;
+  border-radius: $radius-lg;
+  max-width: 320px;
+  width: 100%;
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.title {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.sub {
+  margin: 0;
+  font-size: 0.72rem;
+  color: $text-muted;
+  text-align: center;
+}

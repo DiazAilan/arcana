@@ -1,16 +1,17 @@
 @use '../../styles/variables' as *;
 
 .card {
+  position: relative;
   aspect-ratio: $card-aspect;
   width: 118px;
-  padding: 0.55rem 0.5rem;
+  padding: 0.35rem 0.45rem 0.45rem;
   border-radius: $radius-md;
   background: linear-gradient(160deg, lighten($bg-card, 6%), $bg-card);
   border: 2px solid $border-subtle;
   text-align: left;
   display: flex;
   flex-direction: column;
-  gap: 0.25rem;
+  gap: 0.2rem;
   transition: transform 0.12s ease, box-shadow 0.12s ease, border-color 0.12s;
 
   &:hover:not(.disabled) {
@@ -34,8 +35,10 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 44px;
-  margin-bottom: 0.15rem;
+  flex: 1 1 auto;
+  min-height: 58px;
+  margin-top: 0.35rem;
+  margin-bottom: 0.1rem;
   background: rgba(0, 0, 0, 0.2);
   border-radius: $radius-sm;
 }
@@ -44,16 +47,26 @@
   opacity: 0.35;
 }
 
+.costRow {
+  position: absolute;
+  top: 0.22rem;
+  right: 0.28rem;
+  z-index: 1;
+  line-height: 0;
+}
+
 .cost {
-  align-self: flex-end;
-  width: 26px;
-  height: 26px;
+  width: 22px;
+  height: 22px;
   border-radius: 50%;
-  background: rgba(0, 0, 0, 0.35);
+  background: rgba(0, 0, 0, 0.55);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   display: grid;
   place-items: center;
   font-weight: 700;
-  font-size: 0.85rem;
+  font-size: 0.78rem;
+  line-height: 1;
+  pointer-events: none;
 }
 
 .name {
@@ -67,6 +80,33 @@
   text-transform: uppercase;
   letter-spacing: 0.06em;
   color: $text-muted;
+}
+
+.descStat {
+  white-space: nowrap;
+}
+
+.effectIcon {
+  font-size: 0.72rem;
+  opacity: 0.9;
+}
+
+.effectValueInline {
+  font-weight: 800;
+  font-size: 0.82rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.effectBuff {
+  color: $accent-heal;
+}
+
+.effectDebuff {
+  color: $accent-danger;
+}
+
+.effectNeutral {
+  color: $text-primary;
 }
 
 .desc {

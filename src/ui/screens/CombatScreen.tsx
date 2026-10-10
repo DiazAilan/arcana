@@ -1,6 +1,8 @@
 import { useEffect, useRef, useState } from 'react'
 import { useGame } from '../../context/GameContext'
 import { getRegistry } from '../../game/content/registry'
+import { getCardEffects } from '../../game/combat/applyEffects'
+import { cardHasEnemyTargetDamage, previewEnemyHpAfterCard } from '../../game/combat/cardPreview'
 import { BlockBadge } from '../components/BlockBadge'
 import { EnemyArt } from '../components/EnemyArt'
 import { EnergyOrb } from '../components/EnergyOrb'
@@ -15,6 +17,7 @@ import styles from './CombatScreen.module.scss'
 export function CombatScreen() {
   const { session, dispatch } = useGame()
   const [dragOverEnemy, setDragOverEnemy] = useState<number | null>(null)
+  const [draggingIndex, setDraggingIndex] = useState<number | null>(null)
   const [hitFlash, setHitFlash] = useState(false)
   const [damageFloat, setDamageFloat] = useState<number | null>(null)
   const [enemyHit, setEnemyHit] = useState<{ id: string; seed: number } | null>(null)
@@ -101,6 +104,20 @@ export function CombatScreen() {
     })
   }
 
+  const draggedCard = draggingIndex != null ? combat.hand[draggingIndex] : null
+  const draggedEffects = draggedCard ? getCardEffects(draggedCard.defId, draggedCard.upgraded) : []
+  const showHpGhost =
+    draggedCard != null &&
+    dragOverEnemy != null &&
+    cardHasEnemyTargetDamage(draggedEffects)
+
+  const enemyHpPreview = (enemyIndex: number) => {
+    if (!showHpGhost || dragOverEnemy !== enemyIndex) return null
+    const enemy = combat.enemies[enemyIndex]
+    if (!enemy) return null
+    return previewEnemyHpAfterCard(enemy, combat, draggedEffects, enemyIndex)
+  }
+
   return (
     <div className={`${styles.combat} ${hitFlash ? styles.hitFlash : ''}`}>
       <RunHud
@@ -124,7 +141,7 @@ export function CombatScreen() {
               <HitParticles active={shaking} seed={enemyHit?.seed ?? 0} />
               <EnemyArt defId={enemy.defId} artKey={def?.artKey} />
               <h3>{def?.name ?? enemy.defId}</h3>
-              <HpBar hp={enemy.hp} maxHp={enemy.maxHp} />
+              <HpBar hp={enemy.hp} maxHp={enemy.maxHp} previewHp={enemyHpPreview(enemyIndex)} />
               <BlockBadge block={enemy.block} />
               <PowerRow powers={enemy.powers} />
             </div>
@@ -132,7 +149,12 @@ export function CombatScreen() {
         })}
       </div>
 
-      <div className={styles.playerDock}>
+      <div className={styles.playerBottom}>
+        <div className={styles.playerBlockBand}>
+          <BlockBadge block={combat.playerBlock} size="large" />
+        </div>
+
+        <div className={styles.playerDock}>
         <div className={`${styles.playerZone} ${hitFlash ? styles.playerShake : ''}`}>
           <div className={styles.playerMain}>
             <HpBar hp={run.hp} maxHp={run.maxHp} label="You" />
@@ -150,18 +172,19 @@ export function CombatScreen() {
               End Turn (Space)
             </button>
           </div>
-          <div className={styles.playerBlockWrap}>
-            <BlockBadge block={combat.playerBlock} size="large" />
-          </div>
         </div>
 
         <Hand
           hand={combat.hand}
           energy={combat.energy}
+          combat={combat}
+          dragOverEnemy={dragOverEnemy}
           onPlay={playCard}
           canPlay={canPlay}
           onDragOverEnemy={setDragOverEnemy}
+          onDraggingIndexChange={setDraggingIndex}
         />
+        </div>
       </div>
     </div>
   )

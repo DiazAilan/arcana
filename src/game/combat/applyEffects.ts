@@ -2,7 +2,8 @@ import type { CombatEffect } from '../models/effects'
 import type { CombatState } from './combatState'
 import { getRegistry } from '../content/registry'
 import { dealDamageToEnemy, gainBlock } from './damage'
-import { addPower, getPower } from './powers'
+import { outgoingDamageRaw, previewBlockAmount } from './cardPreview'
+import { addPower } from './powers'
 import { drawCards } from './deck'
 
 export type EffectContext = {
@@ -11,11 +12,11 @@ export type EffectContext = {
 }
 
 function damageAmount(state: CombatState, base: number): number {
-  return base + getPower(state.playerPowers, 'strength')
+  return outgoingDamageRaw(state, base)
 }
 
 function blockAmount(state: CombatState, base: number): number {
-  return base + getPower(state.playerPowers, 'dexterity')
+  return previewBlockAmount(state, base)
 }
 
 export function applyCombatEffects(

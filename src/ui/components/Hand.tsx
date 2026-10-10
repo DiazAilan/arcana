@@ -1,9 +1,12 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import type { CardInstance } from '../../game/models/card'
+import type { CombatState } from '../../game/combat/combatState'
 import { getRegistry } from '../../game/content/registry'
 import { getCardEffects } from '../../game/combat/applyEffects'
+import { getCardStatPreviews } from '../../game/combat/cardPreview'
 import { requiresEnemyTarget } from '../../game/combat/cardTargeting'
 import { CardDragGhost } from './CardDragGhost'
+import { CardInspectModal } from './CardInspectModal'
 import { CardView } from './CardView'
 import { findDropTarget, resolveDropPlay } from './cardDrop'
 import styles from './Hand.module.scss'
@@ -14,9 +17,12 @@ const DRAW_ANIM_MS = 240
 type Props = {
   hand: CardInstance[]
   energy: number
+  combat: Pick<CombatState, 'playerPowers' | 'enemies'>
+  dragOverEnemy: number | null
   onPlay: (index: number, targetEnemyIndex?: number) => void
   canPlay: boolean
   onDragOverEnemy: (index: number | null) => void
+  onDraggingIndexChange: (index: number | null) => void
 }
 
 function isTypingTarget(target: EventTarget | null): boolean {
@@ -29,7 +35,16 @@ function digitToIndex(key: string): number | null {
   return null
 }
 
-export function Hand({ hand, energy, onPlay, canPlay, onDragOverEnemy }: Props) {
+export function Hand({
+  hand,
+  energy,
+  combat,
+  dragOverEnemy,
+  onPlay,
+  canPlay,
+  onDragOverEnemy,
+  onDraggingIndexChange,
+}: Props) {
   const handRef = useRef<HTMLDivElement>(null)
   const dragRef = useRef<{ index: number; pointerId: number; startX: number; startY: number; active: boolean } | null>(
     null,
@@ -43,6 +58,28 @@ export function Hand({ hand, energy, onPlay, canPlay, onDragOverEnemy }: Props) 
   const [ghostPos, setGhostPos] = useState({ x: 0, y: 0 })
   const [ghostVisible, setGhostVisible] = useState(false)
   const [enteringIds, setEnteringIds] = useState<Set<string>>(new Set())
+  const [inspectCard, setInspectCard] = useState<CardInstance | null>(null)
+
+  const previewTarget =
+    draggingIndex != null && dragOverEnemy != null ? dragOverEnemy : undefined
+
+  const statPreviewsFor = useCallback(
+    (card: CardInstance) => {
+      const effects = getCardEffects(card.defId, card.upgraded)
+      return getCardStatPreviews(combat, effects, {
+        targetEnemyIndex: previewTarget,
+      })
+    },
+    [combat, previewTarget],
+  )
+
+  const setDragIndex = useCallback(
+    (index: number | null) => {
+      setDraggingIndex(index)
+      onDraggingIndexChange(index)
+    },
+    [onDraggingIndexChange],
+  )
 
   const tryPlay = useCallback(
     (index: number, targetEnemyIndex?: number) => {
@@ -56,10 +93,10 @@ export function Hand({ hand, energy, onPlay, canPlay, onDragOverEnemy }: Props) 
   )
 
   const clearDragUi = useCallback(() => {
-    setDraggingIndex(null)
+    setDragIndex(null)
     setGhostVisible(false)
     onDragOverEnemy(null)
-  }, [onDragOverEnemy])
+  }, [onDragOverEnemy, setDragIndex])
 
   const finishDragAt = useCallback(
     (index: number, clientX: number, clientY: number) => {
@@ -89,6 +126,15 @@ export function Hand({ hand, energy, onPlay, canPlay, onDragOverEnemy }: Props) 
     },
     [clearDragUi, finishDragAt],
   )
+
+  useEffect(() => {
+    if (!inspectCard) return
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setInspectCard(null)
+    }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [inspectCard])
 
   useEffect(() => {
     const prev = prevHandIdsRef.current
@@ -121,7 +167,7 @@ export function Hand({ hand, energy, onPlay, canPlay, onDragOverEnemy }: Props) 
       const dy = e.clientY - drag.startY
       if (!drag.active && Math.hypot(dx, dy) >= DRAG_THRESHOLD) {
         drag.active = true
-        setDraggingIndex(drag.index)
+        setDragIndex(drag.index)
         setGhostVisible(true)
         setGhostPos({ x: e.clientX, y: e.clientY })
       }
@@ -154,7 +200,7 @@ export function Hand({ hand, energy, onPlay, canPlay, onDragOverEnemy }: Props) 
       window.removeEventListener('pointerup', onUp)
       window.removeEventListener('pointercancel', onUp)
     }
-  }, [finishPointerDrag, onDragOverEnemy])
+  }, [finishPointerDrag, onDragOverEnemy, setDragIndex])
 
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
@@ -172,7 +218,7 @@ export function Hand({ hand, energy, onPlay, canPlay, onDragOverEnemy }: Props) 
 
       e.preventDefault()
       keyboardDragRef.current = { index: idx, code: e.code }
-      setDraggingIndex(idx)
+      setDragIndex(idx)
       setGhostVisible(true)
       setGhostPos(cursorRef.current)
     }
@@ -193,7 +239,7 @@ export function Hand({ hand, energy, onPlay, canPlay, onDragOverEnemy }: Props) 
       window.removeEventListener('keydown', onKeyDown)
       window.removeEventListener('keyup', onKeyUp)
     }
-  }, [canPlay, clearDragUi, energy, finishDragAt, hand])
+  }, [canPlay, clearDragUi, energy, finishDragAt, hand, setDragIndex])
 
   const onPointerDown = (index: number) => (e: React.PointerEvent) => {
     if (!canPlay || e.button !== 0 || keyboardDragRef.current) return
@@ -205,6 +251,12 @@ export function Hand({ hand, energy, onPlay, canPlay, onDragOverEnemy }: Props) 
       active: false,
     }
     ;(e.target as HTMLElement).setPointerCapture?.(e.pointerId)
+  }
+
+  const onContextMenu = (card: CardInstance) => (e: React.MouseEvent) => {
+    if (draggingIndex != null || dragRef.current?.active) return
+    e.preventDefault()
+    setInspectCard(card)
   }
 
   const onCardClick = (index: number) => {
@@ -220,28 +272,43 @@ export function Hand({ hand, energy, onPlay, canPlay, onDragOverEnemy }: Props) 
   }
 
   const ghostCard = draggingIndex != null ? hand[draggingIndex] ?? null : null
+  const ghostPreviews = ghostCard ? statPreviewsFor(ghostCard) : undefined
 
   return (
     <>
-      <CardDragGhost card={ghostCard} x={ghostPos.x} y={ghostPos.y} visible={ghostVisible} />
-      <div ref={handRef} className={styles.hand} data-hand-zone>
-        {hand.map((card, index) => (
-          <div
-            key={card.instanceId}
-            className={`${styles.slot} ${enteringIds.has(card.instanceId) ? styles.entering : ''}`}
-            style={{ ['--i' as string]: index }}
-          >
-            <span className={styles.slotKey}>{index + 1}</span>
-            <CardView
-              card={card}
-              disabled={!canPlay}
-              dragging={draggingIndex === index}
-              onPointerDown={onPointerDown(index)}
-              onClick={() => onCardClick(index)}
-            />
-          </div>
-        ))}
-        <span className={styles.hint}>Energy: {energy} · 1–5 hold & release · drag to play</span>
+      <CardDragGhost
+        card={ghostCard}
+        x={ghostPos.x}
+        y={ghostPos.y}
+        visible={ghostVisible}
+        statPreviews={ghostPreviews}
+      />
+      {inspectCard ? <CardInspectModal card={inspectCard} onClose={() => setInspectCard(null)} /> : null}
+      <div ref={handRef} className={styles.handZone} data-hand-zone>
+        <div className={styles.cardRow}>
+          {hand.map((card, index) => (
+            <div
+              key={card.instanceId}
+              className={`${styles.slot} ${enteringIds.has(card.instanceId) ? styles.entering : ''}`}
+              style={{ ['--i' as string]: index }}
+            >
+              <span className={styles.slotKey}>{index + 1}</span>
+              <CardView
+                card={card}
+                disabled={!canPlay}
+                dragging={draggingIndex === index}
+                onPointerDown={onPointerDown(index)}
+                onContextMenu={onContextMenu(card)}
+                onClick={() => onCardClick(index)}
+                statMode="combat"
+                statPreviews={statPreviewsFor(card)}
+              />
+            </div>
+          ))}
+        </div>
+        <span className={styles.hint}>
+          Energy: {energy} · 1–5 hold & release · drag to play · right-click: base card
+        </span>
       </div>
     </>
   )

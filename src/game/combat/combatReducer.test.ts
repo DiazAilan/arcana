@@ -28,6 +28,25 @@ describe('combatReducer', () => {
     expect(result.state.energy).toBe(2)
   })
 
+  it('applies Weak to player attack damage', () => {
+    const deck = deckFromDefIds(['arc_strike'])
+    const rng = new SeededRNG(42)
+    let combat = createCombatState(deck, ['mob_wisp'], rng, 3, [])
+    combat = {
+      ...combat,
+      playerPowers: { weak: 1 },
+      hand: combat.hand.filter((c) => c.defId === 'arc_strike'),
+      energy: 3,
+    }
+    const hpBefore = combat.enemies[0]!.hp
+    const result = combatReducer(
+      combat,
+      { type: 'PLAY_CARD', handIndex: 0, targetEnemyIndex: 0 },
+      { playerHp: 70, playerMaxHp: 70, rng },
+    )
+    expect(hpBefore - result.state.enemies[0]!.hp).toBe(4)
+  })
+
   it('ends turn and enemy attacks', () => {
     const deck = deckFromDefIds(Array(10).fill('arc_defend'))
     const rng = new SeededRNG(7)
