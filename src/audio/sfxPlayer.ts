@@ -12,19 +12,26 @@ export type SfxId =
   | 'cardBash'
   | 'cardRupture'
 
+/** Vite `base` is `/arcana/` on GitHub Pages — root-absolute `/sfx/...` 404s in production. */
+function publicAsset(path: string): string {
+  const base = import.meta.env.BASE_URL
+  const rel = path.replace(/^\//, '')
+  return `${base}${rel}`
+}
+
 const SFX_PATHS: Record<SfxId, string> = {
-  blockGain: '/sfx/block-gain.wav',
-  blockDeflect: '/sfx/block-deflect.wav',
-  takeDamageT1: '/sfx/take-damage-t1.wav',
-  takeDamageT2: '/sfx/take-damage-t2.wav',
-  takeDamageT3: '/sfx/take-damage-t3.wav',
-  takeDamageT4: '/sfx/take-damage-t4.wav',
-  dealDamageT1: '/sfx/take-damage-t1.wav',
-  dealDamageT2: '/sfx/take-damage-t2.wav',
-  dealDamageT3: '/sfx/take-damage-t3.wav',
-  dealDamageT4: '/sfx/take-damage-t4.wav',
-  cardBash: '/sfx/card-bash.wav',
-  cardRupture: '/sfx/card-rupture.wav',
+  blockGain: publicAsset('sfx/block-gain.wav'),
+  blockDeflect: publicAsset('sfx/block-deflect.wav'),
+  takeDamageT1: publicAsset('sfx/take-damage-t1.wav'),
+  takeDamageT2: publicAsset('sfx/take-damage-t2.wav'),
+  takeDamageT3: publicAsset('sfx/take-damage-t3.wav'),
+  takeDamageT4: publicAsset('sfx/take-damage-t4.wav'),
+  dealDamageT1: publicAsset('sfx/take-damage-t1.wav'),
+  dealDamageT2: publicAsset('sfx/take-damage-t2.wav'),
+  dealDamageT3: publicAsset('sfx/take-damage-t3.wav'),
+  dealDamageT4: publicAsset('sfx/take-damage-t4.wav'),
+  cardBash: publicAsset('sfx/card-bash.wav'),
+  cardRupture: publicAsset('sfx/card-rupture.wav'),
 }
 
 let volumeGetter: () => number = () => 0.7
