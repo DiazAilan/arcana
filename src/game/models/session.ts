@@ -35,7 +35,16 @@ export type GamePhase =
     }
   | { kind: 'shop'; shop: ShopState }
   | { kind: 'rest' }
-  | { kind: 'event'; eventId: string; outcome: string[] | null }
+  | {
+      kind: 'event'
+      eventId: string
+      outcome: string[] | null
+      /** Card defIds from this choice; shown until Continue */
+      offeredCards: string[] | null
+      /** Subset still awaiting take/skip; null when none or all resolved */
+      pendingCards: string[] | null
+      cardDecisions: Record<string, 'taken' | 'skipped'> | null
+    }
   | { kind: 'victory' }
   | { kind: 'game_over' }
 

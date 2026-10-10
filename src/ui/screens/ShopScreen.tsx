@@ -1,6 +1,8 @@
+import { useState } from 'react'
 import { useGame } from '../../context/GameContext'
 import { getRegistry } from '../../game/content/registry'
 import { createCardInstance } from '../../game/models/card'
+import { CardUpgradeCompareModal } from '../components/CardUpgradeCompareModal'
 import { CardView } from '../components/CardView'
 import { RelicIcon } from '../components/RelicIcon'
 import { RunHud } from '../components/RunHud'
@@ -8,15 +10,20 @@ import styles from './ShopScreen.module.scss'
 
 export function ShopScreen() {
   const { session, dispatch } = useGame()
+  const [compareDefId, setCompareDefId] = useState<string | null>(null)
   if (session.phase.kind !== 'shop' || !session.run) return null
 
   const { shop } = session.phase
   const run = session.run
   const registry = getRegistry()
+  const hasCardOffers = shop.offers.some((o) => !o.purchased && o.kind === 'card')
 
   return (
     <div className={styles.shop}>
       <RunHud run={run} center={<h2 className={styles.title}>Relic Market</h2>} />
+      {hasCardOffers ? (
+        <p className={styles.shopHint}>Click a card to compare upgrade · Buy to purchase</p>
+      ) : null}
 
       <div className={styles.offers}>
         {shop.offers.map((offer, index) => {
@@ -24,7 +31,10 @@ export function ShopScreen() {
           if (offer.kind === 'card' && offer.cardId) {
             return (
               <div key={index} className={styles.offer}>
-                <CardView card={createCardInstance(offer.cardId)} disabled />
+                <CardView
+                  card={createCardInstance(offer.cardId)}
+                  onClick={() => offer.cardId && setCompareDefId(offer.cardId)}
+                />
                 <button
                   type="button"
                   className="btnPrimary"
@@ -74,6 +84,10 @@ export function ShopScreen() {
           return null
         })}
       </div>
+
+      {compareDefId ? (
+        <CardUpgradeCompareModal defId={compareDefId} onClose={() => setCompareDefId(null)} />
+      ) : null}
 
       <button type="button" className="btnGhost" onClick={() => dispatch({ type: 'SHOP_LEAVE' })}>
         Leave shop

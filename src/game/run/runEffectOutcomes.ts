@@ -13,6 +13,7 @@ export function formatRunEffectOutcomes(
   effects: RunEffect[],
   runBefore: RunState,
   runAfter: RunState,
+  options?: { deferAddCard?: boolean },
 ): string[] {
   const lines: string[] = []
   const registry = getRegistry()
@@ -31,7 +32,11 @@ export function formatRunEffectOutcomes(
         break
       case 'add_card': {
         const name = registry.cards.get(effect.cardId)?.name ?? effect.cardId
-        lines.push(`Added ${name} to your deck.`)
+        if (options?.deferAddCard) {
+          lines.push(`Offered ${name}.`)
+        } else {
+          lines.push(`Added ${name} to your deck.`)
+        }
         break
       }
       case 'add_relic': {

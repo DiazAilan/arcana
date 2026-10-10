@@ -19,7 +19,8 @@ export function createShop(rng: SeededRNG, cardPool: string[], relicPool: string
   const relicIds = rng.shuffle([...relicPool]).slice(0, 2)
   for (const relicId of relicIds) {
     if (registry.relics.has(relicId)) {
-      offers.push({ kind: 'relic', relicId, price: RELIC_PRICE, purchased: false })
+      const price = registry.relics.get(relicId)?.shopPrice ?? RELIC_PRICE
+      offers.push({ kind: 'relic', relicId, price, purchased: false })
     }
   }
 

@@ -11,10 +11,11 @@ type Props = {
   onClose: () => void
 }
 
-const TABS: { id: SpriteGroup; label: string; file: string }[] = [
-  { id: 'card', label: 'Cards', file: 'cardArt.ts' },
-  { id: 'enemy', label: 'Enemies', file: 'enemyArt.ts' },
-  { id: 'relic', label: 'Relics', file: 'relicArt.ts' },
+const TABS: { id: SpriteGroup; label: string; file: string; grid: string }[] = [
+  { id: 'card', label: 'Cards', file: 'cardArt.ts', grid: '16×16' },
+  { id: 'enemy', label: 'Enemies', file: 'enemyArt.ts', grid: '16×16' },
+  { id: 'relic', label: 'Relics', file: 'relicArt.ts', grid: '16×16' },
+  { id: 'event', label: 'Events', file: 'eventArt.ts', grid: '64×64' },
 ]
 
 export function DevSpriteGallery({ onClose }: Props) {
@@ -25,7 +26,7 @@ export function DevSpriteGallery({ onClose }: Props) {
   return (
     <div className={styles.gallery}>
       <div className={styles.header}>
-        <h1>Sprite gallery (16×16)</h1>
+        <h1>Sprite gallery ({active.grid})</h1>
         <button type="button" className="btnGhost" onClick={onClose}>
           Back
         </button>
@@ -69,7 +70,7 @@ export function DevSpriteGallery({ onClose }: Props) {
               <span className={styles.id}>{entry.id}</span>
             </div>
             <div className={styles.preview}>
-              <PixelSprite rows={entry.rows} pixelSize={8} />
+              <PixelSprite rows={entry.rows} pixelSize={tab === 'event' ? 2 : 8} />
             </div>
             <pre className={styles.source}>{entry.rows.map((row) => `'${row}',`).join('\n')}</pre>
           </div>

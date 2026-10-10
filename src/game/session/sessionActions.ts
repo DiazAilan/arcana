@@ -15,6 +15,7 @@ export type SessionAction =
   | { type: 'REST_UPGRADE'; instanceId: string }
   | { type: 'REST_LEAVE' }
   | { type: 'EVENT_CHOICE'; choiceIndex: number }
+  | { type: 'EVENT_CARD_DECISION'; cardId: string; accept: boolean }
   | { type: 'EVENT_CONTINUE' }
   | { type: 'GO_MAIN_MENU' }
   | { type: 'DEV_RELIC_ADD'; relicId: string }

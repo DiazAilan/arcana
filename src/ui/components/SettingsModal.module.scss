@@ -59,3 +59,29 @@
   min-width: 2.5rem;
   text-align: right;
 }
+
+.reportSection {
+  padding: 0 1.25rem 1.25rem;
+  border-top: 1px solid $border-subtle;
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+  align-items: stretch;
+}
+
+.reportLead {
+  margin: 1rem 0 0;
+  font-size: 0.85rem;
+  color: $text-muted;
+  line-height: 1.45;
+}
+
+.reportMeta {
+  margin: 0;
+  font-size: 0.8rem;
+  color: $text-primary;
+}
+
+.reportSection .btnPrimary {
+  width: 100%;
+}

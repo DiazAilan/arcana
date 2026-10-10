@@ -14,6 +14,13 @@
   font-size: 1.1rem;
 }
 
+.shopHint {
+  margin: 0;
+  text-align: center;
+  font-size: 0.8rem;
+  color: $text-muted;
+}
+
 .offers {
   display: flex;
   flex-wrap: wrap;

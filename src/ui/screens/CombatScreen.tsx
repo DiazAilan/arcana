@@ -280,7 +280,6 @@ export function CombatScreen() {
       <RunHud
         run={run}
         center={<span className={styles.encounter}>{encounter}</span>}
-        trailing={<EnergyOrb current={combat.energy} max={combat.maxEnergy} />}
         inventoryOpen={inventoryOpen}
         onInventoryOpenChange={onInventoryOpenChange}
         inventoryFooterNote="Master deck — cards split across draw, hand, and discard during combat"
@@ -313,8 +312,16 @@ export function CombatScreen() {
       </div>
 
       <div className={styles.playerBottom}>
-        <div className={styles.playerBlockBand}>
+        <div className={styles.playerHudBand}>
           <BlockBadge block={combat.playerBlock} size="large" />
+          <div className={styles.playerEnergySlot}>
+            <EnergyOrb
+              current={combat.energy}
+              max={combat.maxEnergy}
+              size="combat"
+              showTooltip
+            />
+          </div>
         </div>
 
         <div className={styles.playerDock}>

@@ -23,13 +23,23 @@
   gap: 0;
 }
 
-.playerBlockBand {
-  display: flex;
-  justify-content: center;
+.playerHudBand {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   width: 100%;
   padding: 0.5rem 1rem 0.65rem;
   flex-shrink: 0;
+
+  > :first-child {
+    grid-column: 2;
+  }
+}
+
+.playerEnergySlot {
+  grid-column: 3;
+  justify-self: end;
+  padding-right: 0.25rem;
 }
 
 .playerDock {

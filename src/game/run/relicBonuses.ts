@@ -20,9 +20,14 @@ export function getVictoryHealFromRelics(relicIds: string[]): number {
   return heal
 }
 
-export function getStartingGoldBonus(relicIds: string[]): number {
-  if (relicIds.includes('relic_pouch')) return 20
-  return 0
+export function getFloorGoldFromRelics(relicIds: string[]): number {
+  let total = 0
+  const registry = getRegistry()
+  for (const id of relicIds) {
+    const relic = registry.relics.get(id)
+    if (relic?.floorGold) total += relic.floorGold
+  }
+  return total
 }
 
 export function getCombatStartBlock(relicIds: string[]): number {

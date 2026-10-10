@@ -7,6 +7,7 @@ export const ACT1_RELICS: RelicDef[] = [
     description: 'Start each combat with +1 Energy.',
     hooks: ['maxEnergyBonus'],
     energyBonus: 1,
+    shopPrice: 160,
   },
   {
     id: 'relic_pages',
@@ -25,8 +26,9 @@ export const ACT1_RELICS: RelicDef[] = [
   {
     id: 'relic_pouch',
     name: 'Gilded Pouch',
-    description: 'Gain 20 Gold at the start of the run.',
+    description: 'Gain 15 gold when you descend to a new floor.',
     hooks: [],
+    floorGold: 15,
   },
   {
     id: 'relic_sigil',

@@ -1,6 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useRef, useState, type ReactNode } from 'react'
 import type { GameSession } from '../game/models/session'
 import { SeededRNG } from '../game/rng/SeededRNG'
+import { recordAnalytics } from '../analytics/recorder'
 import type { SessionAction } from '../game/session/sessionActions'
 import { createInitialSession, sessionReducer } from '../game/session/sessionReducer'
 
@@ -19,10 +20,18 @@ export function GameProvider({ children }: { children: ReactNode }) {
     if (action.type === 'NEW_RUN') {
       const seed = action.seed ?? Date.now()
       rngRef.current = new SeededRNG(seed)
-      setSession((prev) => sessionReducer(prev, { type: 'NEW_RUN', seed }, rngRef.current))
+      setSession((prev) => {
+        const next = sessionReducer(prev, { type: 'NEW_RUN', seed }, rngRef.current)
+        recordAnalytics(prev, { type: 'NEW_RUN', seed }, next)
+        return next
+      })
       return
     }
-    setSession((prev) => sessionReducer(prev, action, rngRef.current))
+    setSession((prev) => {
+      const next = sessionReducer(prev, action, rngRef.current)
+      recordAnalytics(prev, action, next)
+      return next
+    })
   }, [])
 
   const value = useMemo(() => ({ session, dispatch }), [session, dispatch])

@@ -5,7 +5,12 @@ import { randomSeed, type SeededRNG } from '../rng/SeededRNG'
 import { generateMap, advanceMap, getNode } from '../run/mapGen'
 import { combatReducer } from '../combat/combatReducer'
 import { createCombatState } from '../combat/startCombat'
-import { getMaxEnergyFromRelics, getVictoryHealFromRelics, getCombatStartBlock } from '../run/relicBonuses'
+import {
+  getCombatStartBlock,
+  getFloorGoldFromRelics,
+  getMaxEnergyFromRelics,
+  getVictoryHealFromRelics,
+} from '../run/relicBonuses'
 import { rollCardOffers, rollGoldReward, rollRelicOffer } from '../run/rewards'
 import { createShop } from '../run/shop'
 import { applyRunEffects } from '../run/runEffects'
@@ -135,8 +140,20 @@ export function sessionReducer(
       const node = getNode(run.map, action.nodeId)
       if (!node) return session
 
+      const prevMaxRow = run.map.clearedNodeIds.reduce((max, id) => {
+        const n = getNode(run.map, id)
+        return n ? Math.max(max, n.row) : max
+      }, -1)
+
       const map = advanceMap(run.map, action.nodeId)
       let nextRun: RunState = { ...run, map, currentNodeId: action.nodeId }
+
+      if (node.row > prevMaxRow) {
+        const floorGold = getFloorGoldFromRelics(nextRun.relics)
+        if (floorGold > 0) {
+          nextRun = { ...nextRun, gold: nextRun.gold + floorGold }
+        }
+      }
 
       switch (node.type) {
         case 'battle':
@@ -153,7 +170,17 @@ export function sessionReducer(
           return { run: nextRun, phase: { kind: 'rest' } }
         case 'event': {
           const eventId = rng.pick(ACT1_EVENTS).id ?? FALLBACK_EVENT_ID
-          return { run: nextRun, phase: { kind: 'event', eventId, outcome: null } }
+          return {
+            run: nextRun,
+            phase: {
+              kind: 'event',
+              eventId,
+              outcome: null,
+              offeredCards: null,
+              pendingCards: null,
+              cardDecisions: null,
+            },
+          }
         }
         default:
           return session
@@ -302,25 +329,68 @@ export function sessionReducer(
       if (session.run.gold < goldCost) return session
 
       const runBefore = session.run
-      let run = applyRunEffects(runBefore, choice.effects, rng)
+      const cardEffects = choice.effects.filter((e) => e.type === 'add_card')
+      const immediateEffects = choice.effects.filter((e) => e.type !== 'add_card')
+      const offeredCardIds = cardEffects.map((e) => (e.type === 'add_card' ? e.cardId : '')).filter(Boolean)
+
+      let run = applyRunEffects(runBefore, immediateEffects, rng)
 
       if (run.hp <= 0) {
         return { run, phase: { kind: 'game_over' } }
       }
 
-      let outcome = formatRunEffectOutcomes(choice.effects, runBefore, run)
+      const deferCards = offeredCardIds.length > 0
+      let outcome = formatRunEffectOutcomes(choice.effects, runBefore, run, {
+        deferAddCard: deferCards,
+      })
       if (outcome.length === 0) {
         outcome = ['You leave.']
       }
 
       return {
         run,
-        phase: { kind: 'event', eventId: session.phase.eventId, outcome },
+        phase: {
+          kind: 'event',
+          eventId: session.phase.eventId,
+          outcome,
+          offeredCards: deferCards ? offeredCardIds : null,
+          pendingCards: deferCards ? [...offeredCardIds] : null,
+          cardDecisions: deferCards ? {} : null,
+        },
+      }
+    }
+
+    case 'EVENT_CARD_DECISION': {
+      if (session.phase.kind !== 'event' || !session.run || !session.phase.pendingCards) return session
+      const { cardId, accept } = action
+      if (!session.phase.pendingCards.includes(cardId)) return session
+
+      let run = session.run
+      if (accept) {
+        run = {
+          ...run,
+          deck: [...run.deck, createCardInstance(cardId)],
+        }
+      }
+
+      const remaining = session.phase.pendingCards.filter((id) => id !== cardId)
+
+      return {
+        run,
+        phase: {
+          ...session.phase,
+          pendingCards: remaining.length > 0 ? remaining : null,
+          cardDecisions: {
+            ...(session.phase.cardDecisions ?? {}),
+            [cardId]: accept ? 'taken' : 'skipped',
+          },
+        },
       }
     }
 
     case 'EVENT_CONTINUE': {
       if (session.phase.kind !== 'event' || !session.run || !session.phase.outcome) return session
+      if (session.phase.pendingCards != null && session.phase.pendingCards.length > 0) return session
       return afterNodeComplete(session)
     }
 

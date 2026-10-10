@@ -6,6 +6,7 @@ export { SPRITE_REGISTRY, spritesForGroup, type SpriteGroup } from './spriteRegi
 import type { SpriteRows } from './types'
 import { CARD_ART } from './literals/cardArt'
 import { ENEMY_ART } from './literals/enemyArt'
+import { DEFAULT_EVENT_ART, EVENT_ART } from './literals/eventArt'
 import { DEFAULT_RELIC_ART, RELIC_ART } from './literals/relicArt'
 
 export function getCardSprite(defId: string, _cardType?: 'attack' | 'skill' | 'power'): SpriteRows {
@@ -18,4 +19,8 @@ export function getEnemySprite(defId: string): SpriteRows {
 
 export function getRelicSprite(relicId: string): SpriteRows {
   return RELIC_ART[relicId] ?? DEFAULT_RELIC_ART
+}
+
+export function getEventSprite(eventId: string): SpriteRows {
+  return EVENT_ART[eventId] ?? DEFAULT_EVENT_ART
 }

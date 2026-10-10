@@ -1,0 +1,146 @@
+@use '../../styles/variables' as *;
+
+.dashboard {
+  flex: 1;
+  overflow: auto;
+  padding: 1rem 1.25rem 2rem;
+  max-width: 960px;
+  margin: 0 auto;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  margin-bottom: 0.5rem;
+
+  h1 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+}
+
+.headerActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.meta {
+  margin: 0 0 1.25rem;
+  font-size: 0.85rem;
+  color: $text-muted;
+}
+
+.section {
+  margin-bottom: 1.75rem;
+
+  h2 {
+    margin: 0 0 0.5rem;
+    font-size: 1rem;
+    color: $accent-gold;
+  }
+}
+
+.playerSummary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.statCard {
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid $border-subtle;
+  border-radius: $radius-md;
+  padding: 0.85rem 1.1rem;
+  min-width: 12rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.statLabel {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $text-muted;
+}
+
+.statValue {
+  font-size: 1.75rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  color: $accent-gold;
+}
+
+.statDetail {
+  font-size: 0.8rem;
+  color: $text-muted;
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.tab {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  border: 1px solid $border-subtle;
+  background: rgba(0, 0, 0, 0.2);
+  color: $text-muted;
+  border-radius: $radius-md;
+  padding: 0.4rem 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+
+  &:hover {
+    color: $text-primary;
+    border-color: rgba($accent-magic, 0.35);
+  }
+}
+
+.tabActive {
+  color: $text-primary;
+  border-color: rgba($accent-magic, 0.55);
+  box-shadow: 0 0 0 1px rgba($accent-magic, 0.25);
+  background: rgba($accent-magic, 0.12);
+}
+
+.tabCount {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: $accent-gold;
+  font-variant-numeric: tabular-nums;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+
+  th,
+  td {
+    padding: 0.4rem 0.55rem;
+    text-align: left;
+    border-bottom: 1px solid $border-subtle;
+  }
+
+  th {
+    color: $text-muted;
+    font-weight: 600;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  td:nth-child(n + 2) {
+    font-variant-numeric: tabular-nums;
+  }
+}

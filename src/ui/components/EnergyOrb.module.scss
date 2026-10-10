@@ -13,6 +13,20 @@
   font-weight: 700;
 }
 
+.orbCombat {
+  width: 70px;
+  height: 70px;
+  box-shadow: 0 0 26px rgba($accent-magic, 0.55);
+
+  .value {
+    font-size: 1.65rem;
+  }
+
+  .sub {
+    font-size: 0.72rem;
+  }
+}
+
 .value {
   font-size: 1.35rem;
   line-height: 1;

@@ -89,10 +89,10 @@ export const ACT1_CARDS: CardDef[] = [
     type: 'skill',
     cost: 1,
     description: 'Heal 5 HP.',
-    effects: [{ type: 'heal', amount: 5 }],
+    effects: [{ type: 'heal', amount: 4 }],
     upgrade: {
       description: 'Heal 8 HP.',
-      effects: [{ type: 'heal', amount: 8 }],
+      effects: [{ type: 'heal', amount: 6 }],
     },
   },
   {

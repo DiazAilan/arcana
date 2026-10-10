@@ -48,4 +48,16 @@ describe('formatRunEffectOutcomes', () => {
     const lines = formatRunEffectOutcomes([{ type: 'gold', amount: 25 }], before, after)
     expect(lines).toContain('Gained 25 gold.')
   })
+
+  it('offers cards when deferAddCard is set', () => {
+    const before = baseRun()
+    const after = { ...before }
+    const lines = formatRunEffectOutcomes(
+      [{ type: 'add_card', cardId: 'arc_rupture' }],
+      before,
+      after,
+      { deferAddCard: true },
+    )
+    expect(lines).toContain('Offered Rupture Seal.')
+  })
 })
