@@ -15,6 +15,15 @@ export type RunEffect =
   | { type: 'add_card'; cardId: string; upgraded?: boolean }
   | { type: 'remove_random_card' }
   | { type: 'add_relic'; relicId: string }
+  | { type: 'set_flag'; flag: string; value: boolean | number }
+  | { type: 'max_hp_delta'; amount: number }
+  | { type: 'add_influence_random_card'; influenceId: string }
+  | { type: 'add_influence_card'; influenceId: string; instanceId?: string }
+  | { type: 'add_influence_relic'; influenceId: string; relicInstanceId?: string }
+  | { type: 'add_influence_random_relic'; influenceId: string }
+  | { type: 'purify_random_bane_card' }
+  | { type: 'purify_card'; instanceId: string }
+  | { type: 'purify_relic'; instanceId: string }
 
 export type PowerKind = 'strength' | 'dexterity' | 'vulnerable' | 'weak' | 'metallicize'
 

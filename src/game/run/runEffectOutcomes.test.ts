@@ -3,6 +3,7 @@ import { loadRegistry } from '../content/registry'
 import { resetCardInstanceCounter } from '../models/card'
 import { formatRunEffectOutcomes } from './runEffectOutcomes'
 import type { RunState } from '../models/session'
+import { createRelicInstance } from '../models/relicInstance'
 import { generateMap } from './mapGen'
 import { SeededRNG } from '../rng/SeededRNG'
 
@@ -19,6 +20,7 @@ function baseRun(overrides: Partial<RunState> = {}): RunState {
     relics: [],
     map: generateMap(rng),
     currentNodeId: null,
+    flags: {},
     ...overrides,
   }
 }
@@ -29,7 +31,7 @@ describe('formatRunEffectOutcomes', () => {
   })
   it('describes relic and damage', () => {
     const before = baseRun({ hp: 70, relics: [] })
-    const after = { ...before, hp: 62, relics: ['relic_embers'] }
+    const after = { ...before, hp: 62, relics: [createRelicInstance('relic_embers')] }
     const lines = formatRunEffectOutcomes(
       [
         { type: 'damage_player', amount: 8 },

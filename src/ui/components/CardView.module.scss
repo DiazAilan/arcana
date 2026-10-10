@@ -102,6 +102,18 @@
   font-weight: 800;
 }
 
+.costWorsened {
+  color: $accent-danger;
+  font-weight: 800;
+}
+
+.influenceLine {
+  font-size: 0.62rem;
+  line-height: 1.2;
+  color: $accent-gold;
+  letter-spacing: 0.02em;
+}
+
 .effectBuff {
   color: $accent-heal;
   font-weight: 800;

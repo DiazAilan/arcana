@@ -33,7 +33,7 @@ function finalize(outcome: RunOutcome, session: GameSession): void {
     outcome,
     cardPlays: { ...active.cardPlays },
     deckDefIds,
-    relicIds: [...session.run.relics],
+    relicIds: session.run.relics.map((r) => r.defId),
     enemyEncounters: [...active.enemyEncounters],
   }
   appendCompletedRun(record)

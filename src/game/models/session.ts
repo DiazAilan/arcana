@@ -1,13 +1,15 @@
 import type { CardInstance } from './card'
 import type { CombatState } from '../combat/combatState'
 import type { MapState } from './map'
+import type { RelicInstance } from './relicInstance'
 
 export type EncounterKind = 'battle' | 'elite' | 'boss'
 
 export type ShopOffer = {
-  kind: 'card' | 'relic' | 'remove'
+  kind: 'card' | 'relic' | 'remove' | 'influence_card' | 'influence_relic' | 'purify'
   cardId?: string
   relicId?: string
+  influenceId?: string
   price: number
   purchased: boolean
 }
@@ -32,6 +34,8 @@ export type GamePhase =
       relicOffer: string | null
       encounter: EncounterKind
       cardResolved: boolean
+      /** Post-combat influence cling — pick a deck card to receive it. */
+      pendingInfluence: { influenceId: string; eligibleInstanceIds: string[] } | null
     }
   | { kind: 'shop'; shop: ShopState }
   | { kind: 'rest' }
@@ -48,6 +52,8 @@ export type GamePhase =
   | { kind: 'victory'; variant: 'sealed' | 'true' }
   | { kind: 'game_over' }
 
+export type RunFlags = Record<string, boolean | number>
+
 export type RunState = {
   seed: number
   characterId: string
@@ -55,9 +61,10 @@ export type RunState = {
   maxHp: number
   gold: number
   deck: CardInstance[]
-  relics: string[]
+  relics: RelicInstance[]
   map: MapState
   currentNodeId: string | null
+  flags: RunFlags
   /** Dev-only: pick any uncleared map node regardless of edges. */
   devFly?: boolean
 }

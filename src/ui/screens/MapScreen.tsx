@@ -10,7 +10,7 @@ const NODE_LABEL: Record<MapNodeType, string> = {
   battle: 'Combat',
   elite: 'Elite',
   shop: 'Bazaar',
-  rest: 'Hearth',
+  rest: 'Rest',
   event: 'Omen',
   boss: 'Sanctum',
 }

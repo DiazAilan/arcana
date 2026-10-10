@@ -224,12 +224,15 @@ const event_vault = compose([
   '......................................................',
 ])
 
+const event_basin = event_camp
+
 export const EVENT_ART: Record<string, SpriteRows> = {
   event_shrine,
   event_merchant,
   event_mirror,
   event_camp,
   event_vault,
+  event_basin,
 }
 
 export const DEFAULT_EVENT_ART: SpriteRows = EVENT_ART.event_camp!

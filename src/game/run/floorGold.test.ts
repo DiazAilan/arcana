@@ -5,8 +5,9 @@ import { generateMap, getNode } from './mapGen'
 import { SeededRNG } from '../rng/SeededRNG'
 import { sessionReducer } from '../session/sessionReducer'
 import type { GameSession } from '../models/session'
+import { createRelicInstance, type RelicInstance } from '../models/relicInstance'
 
-function mapSession(nodeId: string, relics: string[] = []): GameSession {
+function mapSession(nodeId: string, relics: RelicInstance[] = []): GameSession {
   resetCardInstanceCounter()
   const rng = new SeededRNG(42)
   const map = generateMap(rng)
@@ -27,6 +28,7 @@ function mapSession(nodeId: string, relics: string[] = []): GameSession {
       relics,
       map: { ...map, clearedNodeIds: cleared, availableNodeIds: available },
       currentNodeId: null,
+      flags: {},
     },
     phase: { kind: 'map' },
   }
@@ -38,7 +40,7 @@ describe('floor gold from Gilded Pouch', () => {
   })
 
   it('grants gold when entering a higher row', () => {
-    const session = mapSession('n-1-0', ['relic_pouch'])
+    const session = mapSession('n-1-0', [createRelicInstance('relic_pouch')])
     const next = sessionReducer(session, { type: 'MAP_PICK_NODE', nodeId: 'n-1-0' }, new SeededRNG(1))
     expect(next.run!.gold).toBe(65)
   })

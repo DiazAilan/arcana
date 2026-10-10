@@ -64,6 +64,46 @@ export function ShopScreen() {
               </div>
             )
           }
+          if (offer.kind === 'influence_card' && offer.cardId && offer.influenceId) {
+            const inf = registry.influences.get(offer.influenceId)
+            return (
+              <div key={index} className={styles.offer}>
+                <CardView card={createCardInstance(offer.cardId, false, [offer.influenceId])} />
+                <p className={styles.desc}>{inf?.name} — {inf?.description}</p>
+                <button
+                  type="button"
+                  className="btnPrimary"
+                  disabled={run.gold < offer.price}
+                  onClick={() => dispatch({ type: 'SHOP_BUY', offerIndex: index })}
+                >
+                  Buy touched card {offer.price}g
+                </button>
+              </div>
+            )
+          }
+          if (offer.kind === 'purify') {
+            const baneCards = run.deck.filter((c) =>
+              c.influences.some((id) => registry.influences.get(id)?.polarity === 'bane'),
+            )
+            return (
+              <div key={index} className={styles.remove}>
+                <h3>Purify a card ({offer.price}g)</h3>
+                <p className={styles.desc}>Remove one bane influence from a card.</p>
+                <div className={styles.deck}>
+                  {baneCards.map((card) => (
+                    <CardView
+                      key={card.instanceId}
+                      card={card}
+                      disabled={run.gold < offer.price}
+                      onClick={() =>
+                        dispatch({ type: 'SHOP_PURIFY_CARD', instanceId: card.instanceId })
+                      }
+                    />
+                  ))}
+                </div>
+              </div>
+            )
+          }
           if (offer.kind === 'remove') {
             return (
               <div key={index} className={styles.remove}>

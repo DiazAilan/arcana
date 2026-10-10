@@ -1,6 +1,6 @@
-/** 32-color palette (+ `.` transparent). One ASCII char per pixel. Grid size: 16×16. */
+/** 32-color palette (+ `.` transparent). One ASCII char per pixel. Grid size: 32×32. */
 
-export const SPRITE_GRID = 16
+export const SPRITE_GRID = 32
 
 export const SPRITE_PALETTE: Record<string, string> = {
   '.': 'transparent',

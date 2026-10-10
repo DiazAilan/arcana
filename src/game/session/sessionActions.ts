@@ -13,7 +13,10 @@ export type SessionAction =
   | { type: 'SHOP_LEAVE' }
   | { type: 'REST_HEAL' }
   | { type: 'REST_UPGRADE'; instanceId: string }
+  | { type: 'REST_PURIFY'; instanceId: string }
   | { type: 'REST_LEAVE' }
+  | { type: 'REWARD_APPLY_INFLUENCE'; instanceId: string }
+  | { type: 'SHOP_PURIFY_CARD'; instanceId: string }
   | { type: 'EVENT_CHOICE'; choiceIndex: number }
   | { type: 'EVENT_CARD_DECISION'; cardId: string; accept: boolean }
   | { type: 'EVENT_CONTINUE' }

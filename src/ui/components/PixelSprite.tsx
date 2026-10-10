@@ -8,7 +8,7 @@ type Props = {
   className?: string
 }
 
-export function PixelSprite({ rows, pixelSize = 6, className }: Props) {
+export function PixelSprite({ rows, pixelSize = 3, className }: Props) {
   const cols = rows[0]?.length ?? 0
 
   return (

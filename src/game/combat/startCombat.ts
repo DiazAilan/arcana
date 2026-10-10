@@ -1,4 +1,5 @@
 import type { CardInstance } from '../models/card'
+import type { RelicInstance } from '../models/relicInstance'
 import type { CombatState } from './combatState'
 import { HAND_SIZE } from './combatState'
 import { createEnemyInstance, resetEnemyInstanceCounter } from '../models/enemy'
@@ -7,13 +8,14 @@ import { SeededRNG } from '../rng/SeededRNG'
 import { shuffleIntoDraw, drawCards } from './deck'
 import { getPower } from './powers'
 import { gainBlock } from './damage'
+import { resolveRelicInstance } from '../run/resolveRelic'
 
 export function createCombatState(
   deck: CardInstance[],
   enemyDefIds: string[],
   rng: SeededRNG,
   maxEnergy: number,
-  relicIds: string[],
+  relics: RelicInstance[],
 ): CombatState {
   resetEnemyInstanceCounter()
   const registry = getRegistry()
@@ -35,13 +37,16 @@ export function createCombatState(
     discardPile: [],
     exhaustPile: [],
     enemies,
+    heroicEffortUsed: false,
+    heroicEffortUsesThisCombat: 0,
+    survivedHitTags: [],
   }
 
   let next = state
-  for (const relicId of relicIds) {
-    const relic = registry.relics.get(relicId)
-    if (relic?.combatStartDraw) {
-      const drawn = drawCards(next, relic.combatStartDraw, rng)
+  for (const relicInst of relics) {
+    const resolved = resolveRelicInstance(relicInst)
+    if (resolved.combatStartDraw > 0) {
+      const drawn = drawCards(next, resolved.combatStartDraw, rng)
       next = drawn.state
     }
   }

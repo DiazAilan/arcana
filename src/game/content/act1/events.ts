@@ -16,7 +16,11 @@ export const ACT1_EVENTS: EventDef[] = [
       },
       {
         label: 'Smash the altar (take 6 damage)',
-        effects: [{ type: 'gold', amount: 45 }, { type: 'damage_player', amount: 6 }],
+        effects: [
+          { type: 'gold', amount: 45 },
+          { type: 'damage_player', amount: 6 },
+          { type: 'set_flag', flag: 'shrine_broken', value: true },
+        ],
       },
       {
         label: 'Leave',
@@ -31,11 +35,18 @@ export const ACT1_EVENTS: EventDef[] = [
     choices: [
       {
         label: 'Pay 50 gold',
-        effects: [{ type: 'gold', amount: -50 }, { type: 'add_card', cardId: 'arc_rupture' }],
+        effects: [
+          { type: 'gold', amount: -50 },
+          { type: 'add_card', cardId: 'arc_rupture' },
+          { type: 'add_influence_random_card', influenceId: 'inf_pearl_touched' },
+        ],
       },
       {
         label: 'Offer blood (lose 10 HP)',
-        effects: [{ type: 'damage_player', amount: 10 }, { type: 'add_card', cardId: 'arc_channel' }],
+        effects: [
+          { type: 'damage_player', amount: 10 },
+          { type: 'add_card', cardId: 'arc_channel' },
+        ],
       },
       {
         label: 'Decline',
@@ -50,11 +61,15 @@ export const ACT1_EVENTS: EventDef[] = [
     choices: [
       {
         label: 'Reach into the hollow',
-        effects: [{ type: 'add_card', cardId: 'arc_might' }, { type: 'add_card', cardId: 'arc_weaken' }],
+        effects: [
+          { type: 'add_card', cardId: 'arc_might' },
+          { type: 'add_card', cardId: 'arc_weaken' },
+          { type: 'add_influence_random_card', influenceId: 'inf_mask_residue' },
+        ],
       },
       {
         label: 'Shatter the masks',
-        effects: [{ type: 'gold', amount: 30 }],
+        effects: [{ type: 'gold', amount: 30 }, { type: 'set_flag', flag: 'masks_angry', value: true }],
       },
     ],
   },
@@ -69,7 +84,10 @@ export const ACT1_EVENTS: EventDef[] = [
       },
       {
         label: 'Sift the slag',
-        effects: [{ type: 'gold', amount: 25 }],
+        effects: [
+          { type: 'gold', amount: 25 },
+          { type: 'add_influence_random_card', influenceId: 'inf_ember_kissed' },
+        ],
       },
     ],
   },
@@ -88,6 +106,25 @@ export const ACT1_EVENTS: EventDef[] = [
       },
       {
         label: 'Walk away',
+        effects: [],
+      },
+    ],
+  },
+  {
+    id: 'event_basin',
+    title: 'Still Water Basin',
+    body: 'Water without ripples fills a stone bowl. The tomb air feels lighter here—for a price.',
+    choices: [
+      {
+        label: 'Wash a card (lose 5 gold)',
+        effects: [{ type: 'gold', amount: -5 }, { type: 'purify_random_bane_card' }],
+      },
+      {
+        label: 'Drink (heal 8 HP, max HP -2)',
+        effects: [{ type: 'heal_player', amount: 8 }, { type: 'max_hp_delta', amount: -2 }],
+      },
+      {
+        label: 'Leave',
         effects: [],
       },
     ],

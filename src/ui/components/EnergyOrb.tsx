@@ -20,7 +20,6 @@ export function EnergyOrb({ current, max, size = 'default', showTooltip = false 
 
   return (
     <Tooltip
-      title="Energy"
       body="Spend energy to play cards each turn. Unused energy is lost when you end your turn."
       placement="top"
     >

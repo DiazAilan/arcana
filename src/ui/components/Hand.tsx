@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import type { CardInstance } from '../../game/models/card'
 import type { CombatState } from '../../game/combat/combatState'
 import { getRegistry } from '../../game/content/registry'
-import { getCardEffects } from '../../game/combat/applyEffects'
+import { getCardEffectsForInstance, getResolvedCardCost } from '../../game/combat/applyEffects'
 import { getCardStatPreviews } from '../../game/combat/cardPreview'
 import { requiresEnemyTarget } from '../../game/combat/cardTargeting'
 import { CardDragGhost } from './CardDragGhost'
@@ -73,7 +73,7 @@ export function Hand({
 
   const statPreviewsFor = useCallback(
     (card: CardInstance) => {
-      const effects = getCardEffects(card.defId, card.upgraded)
+      const effects = getCardEffectsForInstance(card)
       return getCardStatPreviews(combat, effects, {
         targetEnemyIndex: previewTarget,
       })
@@ -94,7 +94,7 @@ export function Hand({
       const card = hand[index]
       if (!card || !canPlay) return
       const def = getRegistry().cards.get(card.defId)
-      if (!def || energy < def.cost) return
+      if (!def || energy < getResolvedCardCost(card)) return
       onPlay(index, targetEnemyIndex)
     },
     [hand, canPlay, energy, onPlay],
@@ -118,7 +118,7 @@ export function Hand({
     (index: number, clientX: number, clientY: number) => {
       const card = hand[index]
       if (!card) return
-      const effects = getCardEffects(card.defId, card.upgraded)
+      const effects = getCardEffectsForInstance(card)
       const drop = findDropTarget(clientX, clientY)
       const result = resolveDropPlay(effects, drop)
       if (result.action === 'play') {
@@ -236,7 +236,7 @@ export function Hand({
       const card = hand[idx]
       if (!card) return
       const def = getRegistry().cards.get(card.defId)
-      if (!def || energy < def.cost) return
+      if (!def || energy < getResolvedCardCost(card)) return
 
       e.preventDefault()
       keyboardDragRef.current = { index: idx, code: e.code }
@@ -289,7 +289,7 @@ export function Hand({
     }
     const card = hand[index]
     if (!card) return
-    const effects = getCardEffects(card.defId, card.upgraded)
+    const effects = getCardEffectsForInstance(card)
     if (requiresEnemyTarget(effects)) tryPlay(index, 0)
     else tryPlay(index)
   }

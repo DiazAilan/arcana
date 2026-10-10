@@ -10,6 +10,7 @@ export const ACT1_RELICS: RelicDef[] = [
     shopPrice: 160,
     isHeart: true,
     heartDomain: 'passion',
+    influenceEligible: true,
   },
   {
     id: 'relic_pages',
@@ -19,6 +20,7 @@ export const ACT1_RELICS: RelicDef[] = [
     combatStartDraw: 1,
     isHeart: true,
     heartDomain: 'life',
+    influenceEligible: true,
   },
   {
     id: 'relic_vial',
@@ -28,6 +30,7 @@ export const ACT1_RELICS: RelicDef[] = [
     victoryHeal: 6,
     isHeart: true,
     heartDomain: 'madness',
+    influenceEligible: true,
   },
   {
     id: 'relic_pouch',
@@ -35,6 +38,7 @@ export const ACT1_RELICS: RelicDef[] = [
     description: 'Gain 15 gold when you descend to a new stratum.',
     hooks: [],
     floorGold: 15,
+    influenceEligible: false,
   },
   {
     id: 'relic_sigil',
@@ -43,6 +47,7 @@ export const ACT1_RELICS: RelicDef[] = [
     hooks: ['onCombatStart'],
     isHeart: true,
     heartDomain: 'creation',
+    influenceEligible: true,
   },
   {
     id: 'relic_ring',
@@ -51,6 +56,7 @@ export const ACT1_RELICS: RelicDef[] = [
     hooks: ['onCardPlayed'],
     isHeart: true,
     heartDomain: 'chaos',
+    influenceEligible: true,
   },
   {
     id: 'relic_feather',
@@ -59,6 +65,7 @@ export const ACT1_RELICS: RelicDef[] = [
     hooks: [],
     isHeart: true,
     heartDomain: 'still',
+    influenceEligible: true,
   },
   {
     id: 'relic_crystal',
@@ -67,12 +74,13 @@ export const ACT1_RELICS: RelicDef[] = [
     hooks: ['maxEnergyBonus', 'onCombatStart'],
     energyBonus: 1,
     combatStartDraw: 1,
+    influenceEligible: true,
   },
 ]
 
 /** Relic ids flagged as Hearts (run gating for true ending). */
 export const HEART_RELIC_IDS = ACT1_RELICS.filter((r) => r.isHeart).map((r) => r.id)
 
-export function runHasHeart(relicIds: string[]): boolean {
-  return relicIds.some((id) => HEART_RELIC_IDS.includes(id))
+export function runHasHeart(relicDefIds: string[]): boolean {
+  return relicDefIds.some((id) => HEART_RELIC_IDS.includes(id))
 }

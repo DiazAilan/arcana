@@ -1,5 +1,7 @@
 import { getRegistry } from '../../game/content/registry'
 import type { CardInstance } from '../../game/models/card'
+import type { RelicInstance } from '../../game/models/relicInstance'
+import { resolveRelicInstance } from '../../game/run/resolveRelic'
 import { CardView } from './CardView'
 import { groupDeck } from './deckGrouping'
 import { RelicIcon } from './RelicIcon'
@@ -7,12 +9,12 @@ import styles from './DeckViewerModal.module.scss'
 
 type Props = {
   deck: CardInstance[]
-  relicIds: string[]
+  relics: RelicInstance[]
   onClose: () => void
   footerNote?: string
 }
 
-export function DeckViewerModal({ deck, relicIds, onClose, footerNote }: Props) {
+export function DeckViewerModal({ deck, relics, onClose, footerNote }: Props) {
   const groups = groupDeck(deck)
   const registry = getRegistry()
 
@@ -34,19 +36,23 @@ export function DeckViewerModal({ deck, relicIds, onClose, footerNote }: Props) 
         <div className={styles.body}>
           <section className={styles.section}>
             <h3 className={styles.sectionTitle}>Relics</h3>
-            {relicIds.length === 0 ? (
+            {relics.length === 0 ? (
               <p className={styles.empty}>No relics yet.</p>
             ) : (
               <ul className={styles.relicList}>
-                {relicIds.map((id) => {
-                  const relic = registry.relics.get(id)
+                {relics.map((inst) => {
+                  const relic = registry.relics.get(inst.defId)
                   if (!relic) return null
+                  const resolved = resolveRelicInstance(inst)
                   return (
-                    <li key={id} className={styles.relicItem}>
-                      <RelicIcon relicId={id} size="md" />
+                    <li key={inst.instanceId} className={styles.relicItem}>
+                      <RelicIcon relicId={resolved.artKey} size="md" />
                       <div className={styles.relicText}>
                         <span className={styles.relicName}>{relic.name}</span>
-                        <p className={styles.relicDesc}>{relic.description}</p>
+                        <p className={styles.relicDesc}>
+                          {relic.description}
+                          {resolved.descriptionSuffix}
+                        </p>
                       </div>
                     </li>
                   )
@@ -69,7 +75,7 @@ export function DeckViewerModal({ deck, relicIds, onClose, footerNote }: Props) 
         </div>
         <p className={styles.footer}>
           {footerNote ? `${footerNote} · ` : null}
-          {relicIds.length} relic{relicIds.length === 1 ? '' : 's'} · {deck.length} cards
+          {relics.length} relic{relics.length === 1 ? '' : 's'} · {deck.length} cards
         </p>
       </div>
     </div>

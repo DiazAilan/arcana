@@ -1,7 +1,7 @@
 import type { CombatState } from './combatState'
-import { HAND_SIZE } from './combatState'
+import { HAND_SIZE, heroicEffortHpCost } from './combatState'
 import { getRegistry } from '../content/registry'
-import { applyCombatEffects, getCardEffects } from './applyEffects'
+import { applyCombatEffects, getCardEffectsForInstance, getResolvedCardCost } from './applyEffects'
 import { drawCards } from './deck'
 import { executeEnemyTurn } from './intents'
 import { applyMetallicize, checkCombatOutcome } from './startCombat'
@@ -11,6 +11,7 @@ import type { SeededRNG } from '../rng/SeededRNG'
 export type CombatAction =
   | { type: 'PLAY_CARD'; handIndex: number; targetEnemyIndex?: number }
   | { type: 'END_TURN' }
+  | { type: 'HEROIC_EFFORT' }
 
 export type CombatReducerContext = {
   playerHp: number
@@ -28,11 +29,30 @@ export function combatReducer(
   action: CombatAction,
   ctx: CombatReducerContext,
 ): CombatReducerResult {
-  if (state.phase !== 'player' && action.type === 'PLAY_CARD') {
+  if (state.phase !== 'player' && (action.type === 'PLAY_CARD' || action.type === 'HEROIC_EFFORT')) {
     return { state, playerHp: ctx.playerHp }
   }
 
   switch (action.type) {
+    case 'HEROIC_EFFORT': {
+      if (state.phase !== 'player' || state.heroicEffortUsed) {
+        return { state, playerHp: ctx.playerHp }
+      }
+      const hpCost = heroicEffortHpCost(state.heroicEffortUsesThisCombat)
+      if (ctx.playerHp <= hpCost) {
+        return { state, playerHp: ctx.playerHp }
+      }
+      return {
+        state: {
+          ...state,
+          energy: state.energy + 1,
+          heroicEffortUsed: true,
+          heroicEffortUsesThisCombat: state.heroicEffortUsesThisCombat + 1,
+        },
+        playerHp: ctx.playerHp - hpCost,
+      }
+    }
+
     case 'PLAY_CARD': {
       if (state.phase !== 'player') return { state, playerHp: ctx.playerHp }
       const card = state.hand[action.handIndex]
@@ -40,7 +60,8 @@ export function combatReducer(
 
       const def = getRegistry().cards.get(card.defId)
       if (!def) return { state, playerHp: ctx.playerHp }
-      if (state.energy < def.cost) return { state, playerHp: ctx.playerHp }
+      const cardCost = getResolvedCardCost(card)
+      if (state.energy < cardCost) return { state, playerHp: ctx.playerHp }
 
       const hand = [...state.hand]
       hand.splice(action.handIndex, 1)
@@ -53,10 +74,10 @@ export function combatReducer(
         hand,
         discardPile,
         exhaustPile,
-        energy: state.energy - def.cost,
+        energy: state.energy - cardCost,
       }
 
-      const effects = getCardEffects(card.defId, card.upgraded)
+      const effects = getCardEffectsForInstance(card)
       const applied = applyCombatEffects(
         next,
         effects,

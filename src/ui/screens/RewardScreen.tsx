@@ -12,10 +12,14 @@ export function RewardScreen() {
   const [compareDefId, setCompareDefId] = useState<string | null>(null)
   if (session.phase.kind !== 'reward' || !session.run) return null
 
-  const { cardOffers, gold, relicOffer, cardResolved } = session.phase
+  const { cardOffers, gold, relicOffer, cardResolved, pendingInfluence } = session.phase
   const registry = getRegistry()
 
-  const canContinue = cardResolved && !relicOffer
+  const influenceDef = pendingInfluence
+    ? registry.influences.get(pendingInfluence.influenceId)
+    : null
+
+  const canContinue = cardResolved && !relicOffer && !pendingInfluence
 
   const run = session.run
 
@@ -25,7 +29,27 @@ export function RewardScreen() {
       <h2>Victory</h2>
       <p className={styles.gold}>+{gold} gold</p>
 
-      {!cardResolved ? (
+      {pendingInfluence && influenceDef ? (
+        <div className={styles.influence}>
+          <p className={styles.label}>Something clings — choose a card to mark</p>
+          <p className={styles.desc}>{influenceDef.description}</p>
+          <div className={styles.cards}>
+            {run.deck
+              .filter((c) => pendingInfluence.eligibleInstanceIds.includes(c.instanceId))
+              .map((card) => (
+                <CardView
+                  key={card.instanceId}
+                  card={card}
+                  onClick={() =>
+                    dispatch({ type: 'REWARD_APPLY_INFLUENCE', instanceId: card.instanceId })
+                  }
+                />
+              ))}
+          </div>
+        </div>
+      ) : null}
+
+      {!cardResolved && !pendingInfluence ? (
         <>
           <p className={styles.label}>Choose a card · right-click to preview upgrade</p>
           <div className={styles.cards}>
@@ -50,7 +74,7 @@ export function RewardScreen() {
         </>
       ) : null}
 
-      {cardResolved && relicOffer ? (
+      {cardResolved && !pendingInfluence && relicOffer ? (
         <div className={styles.relic}>
           <p>Relic found: {registry.relics.get(relicOffer)?.name}</p>
           <p className={styles.desc}>{registry.relics.get(relicOffer)?.description}</p>

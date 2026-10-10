@@ -1,6 +1,8 @@
 import type { CombatEffect } from '../models/effects'
+import type { CardInstance } from '../models/card'
 import type { CombatState } from './combatState'
 import { getRegistry } from '../content/registry'
+import { resolveCard } from './resolveCard'
 import { dealDamageToEnemy, gainBlock } from './damage'
 import { outgoingDamageRaw, previewBlockAmount } from './cardPreview'
 import { addPower } from './powers'
@@ -97,4 +99,12 @@ export function getCardEffects(defId: string, upgraded: boolean): CombatEffect[]
   if (!def) return []
   if (upgraded && def.upgrade) return def.upgrade.effects
   return def.effects
+}
+
+export function getCardEffectsForInstance(card: CardInstance): CombatEffect[] {
+  return resolveCard(card).effects
+}
+
+export function getResolvedCardCost(card: CardInstance): number {
+  return resolveCard(card).cost
 }

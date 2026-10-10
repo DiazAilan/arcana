@@ -20,6 +20,7 @@ function eventSession(eventId: string): GameSession {
       relics: [],
       map: generateMap(rng),
       currentNodeId: 'n1',
+      flags: {},
     },
     phase: {
       kind: 'event',

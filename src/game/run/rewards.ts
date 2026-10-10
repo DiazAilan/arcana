@@ -27,13 +27,13 @@ export function rollCardOffers(cardPool: string[], rng: SeededRNG, count = 3): s
 export function rollRelicOffer(
   encounter: EncounterKind,
   relicPool: string[],
-  owned: string[],
+  ownedDefIds: string[],
   rng: SeededRNG,
 ): string | null {
   if (encounter === 'battle') return null
   const chance = encounter === 'boss' ? 1 : 0.4
   if (rng.next() > chance) return null
-  const available = relicPool.filter((id) => !owned.includes(id))
+  const available = relicPool.filter((id) => !ownedDefIds.includes(id))
   if (available.length === 0) return null
   const hearts = available.filter((id) => HEART_RELIC_IDS.includes(id))
   const mundane = available.filter((id) => !HEART_RELIC_IDS.includes(id))

@@ -1,5 +1,13 @@
 import type { GameSession, RunState } from '../models/session'
 import { createCardInstance, deckFromDefIds, resetCardInstanceCounter } from '../models/card'
+import {
+  createRelicInstance,
+  hasRelicDef,
+  relicDefIds,
+  resetRelicInstanceCounter,
+} from '../models/relicInstance'
+import { applyCombatInfluenceTriggers } from '../run/combatInfluenceTriggers'
+import { addInfluenceToCard } from '../run/influenceApply'
 import { loadRegistry, getRegistry } from '../content/registry'
 import { randomSeed, type SeededRNG } from '../rng/SeededRNG'
 import {
@@ -105,10 +113,13 @@ function resolveCombatVictory(session: GameSession, rng: SeededRNG): GameSession
 
   const gold = rollGoldReward(phase.encounter, rng)
   const cardOffers = rollCardOffers(character().cardPool, rng)
+  const influenceResult = applyCombatInfluenceTriggers(run, phase.combat, rng)
+  run = influenceResult.run
+
   const relicOffer = rollRelicOffer(
     phase.encounter,
     ACT1_RELICS.map((r) => r.id),
-    run.relics,
+    relicDefIds(run.relics),
     rng,
   )
 
@@ -121,6 +132,7 @@ function resolveCombatVictory(session: GameSession, rng: SeededRNG): GameSession
       relicOffer,
       encounter: phase.encounter,
       cardResolved: false,
+      pendingInfluence: influenceResult.pendingCardInfluence,
     },
   }
 }
@@ -134,6 +146,7 @@ export function sessionReducer(
     case 'NEW_RUN': {
       loadRegistry()
       resetCardInstanceCounter()
+      resetRelicInstanceCounter()
       const seed = action.seed ?? randomSeed()
       const char = character()
       const deck = deckFromDefIds(char.starterDeck)
@@ -148,6 +161,7 @@ export function sessionReducer(
         relics: [],
         map,
         currentNodeId: null,
+        flags: {},
       }
       return { run, phase: { kind: 'map' } }
     }
@@ -189,7 +203,7 @@ export function sessionReducer(
         case 'boss':
           return startCombatPhase(nextRun, 'boss', rng)
         case 'shop': {
-          const shop = createShop(rng, character().cardPool, ACT1_RELICS.map((r) => r.id))
+          const shop = createShop(rng, character().cardPool, ACT1_RELICS.map((r) => r.id), nextRun)
           return { run: nextRun, phase: { kind: 'shop', shop } }
         }
         case 'rest':
@@ -259,12 +273,12 @@ export function sessionReducer(
     case 'REWARD_TAKE_RELIC': {
       if (session.phase.kind !== 'reward' || !session.run || !session.phase.relicOffer) return session
       const relicOffer = session.phase.relicOffer
-      const run = {
-        ...session.run,
-        relics: session.run.relics.includes(relicOffer)
-          ? session.run.relics
-          : [...session.run.relics, relicOffer],
-      }
+      const run = hasRelicDef(session.run.relics, relicOffer)
+        ? session.run
+        : {
+            ...session.run,
+            relics: [...session.run.relics, createRelicInstance(relicOffer)],
+          }
       return afterNodeComplete({
         ...session,
         run,
@@ -272,9 +286,51 @@ export function sessionReducer(
       })
     }
 
+    case 'REWARD_APPLY_INFLUENCE': {
+      if (session.phase.kind !== 'reward' || !session.run || !session.phase.pendingInfluence) {
+        return session
+      }
+      const { influenceId, eligibleInstanceIds } = session.phase.pendingInfluence
+      if (!eligibleInstanceIds.includes(action.instanceId)) return session
+      const deck = session.run.deck.map((c) => {
+        if (c.instanceId !== action.instanceId) return c
+        return addInfluenceToCard(c, influenceId) ?? c
+      })
+      const phase = { ...session.phase, pendingInfluence: null }
+      if (!phase.relicOffer && phase.cardResolved) {
+        return afterNodeComplete({ ...session, run: { ...session.run, deck }, phase })
+      }
+      return { ...session, run: { ...session.run, deck }, phase }
+    }
+
     case 'REWARD_CONTINUE':
       if (session.phase.kind !== 'reward' || !session.run) return session
+      if (session.phase.pendingInfluence) return session
       return afterNodeComplete(session)
+
+    case 'SHOP_PURIFY_CARD': {
+      if (session.phase.kind !== 'shop' || !session.run) return session
+      const purifyOffer = session.phase.shop.offers.find((o) => o.kind === 'purify')
+      if (!purifyOffer || purifyOffer.purchased) return session
+      if (session.run.gold < purifyOffer.price) return session
+      const card = session.run.deck.find((c) => c.instanceId === action.instanceId)
+      if (!card) return session
+      const baneId = card.influences.find(
+        (id) => getRegistry().influences.get(id)?.polarity === 'bane',
+      )
+      if (!baneId) return session
+      const deck = session.run.deck.map((c) => {
+        if (c.instanceId !== action.instanceId) return c
+        return { ...c, influences: c.influences.filter((id) => id !== baneId) }
+      })
+      const offers = session.phase.shop.offers.map((o) =>
+        o.kind === 'purify' ? { ...o, purchased: true } : o,
+      )
+      return {
+        run: { ...session.run, deck, gold: session.run.gold - purifyOffer.price },
+        phase: { kind: 'shop', shop: { offers } },
+      }
+    }
 
     case 'SHOP_BUY': {
       if (session.phase.kind !== 'shop' || !session.run) return session
@@ -291,8 +347,23 @@ export function sessionReducer(
           ...run,
           deck: [...run.deck, createCardInstance(offer.cardId)],
         }
-      } else if (offer.kind === 'relic' && offer.relicId && !run.relics.includes(offer.relicId)) {
-        run = { ...run, relics: [...run.relics, offer.relicId] }
+      } else if (offer.kind === 'relic' && offer.relicId && !hasRelicDef(run.relics, offer.relicId)) {
+        run = { ...run, relics: [...run.relics, createRelicInstance(offer.relicId)] }
+      } else if (offer.kind === 'influence_card' && offer.influenceId && offer.cardId) {
+        run = {
+          ...run,
+          deck: [
+            ...run.deck,
+            createCardInstance(offer.cardId, false, [offer.influenceId]),
+          ],
+        }
+      } else if (offer.kind === 'influence_relic' && offer.influenceId && offer.relicId) {
+        if (!hasRelicDef(run.relics, offer.relicId)) {
+          run = {
+            ...run,
+            relics: [...run.relics, createRelicInstance(offer.relicId, [offer.influenceId])],
+          }
+        }
       }
 
       return {
@@ -336,6 +407,21 @@ export function sessionReducer(
       )
       const run = { ...session.run, deck }
       return afterNodeComplete({ ...session, run })
+    }
+
+    case 'REST_PURIFY': {
+      if (session.phase.kind !== 'rest' || !session.run) return session
+      const card = session.run.deck.find((c) => c.instanceId === action.instanceId)
+      if (!card) return session
+      const baneId = card.influences.find(
+        (id) => getRegistry().influences.get(id)?.polarity === 'bane',
+      )
+      if (!baneId) return session
+      const deck = session.run.deck.map((c) => {
+        if (c.instanceId !== action.instanceId) return c
+        return { ...c, influences: c.influences.filter((id) => id !== baneId) }
+      })
+      return afterNodeComplete({ ...session, run: { ...session.run, deck } })
     }
 
     case 'REST_LEAVE':
@@ -441,10 +527,13 @@ export function sessionReducer(
     case 'DEV_RELIC_ADD': {
       if (!import.meta.env.DEV || !session.run) return session
       if (!getRegistry().relics.has(action.relicId)) return session
-      if (session.run.relics.includes(action.relicId)) return session
+      if (hasRelicDef(session.run.relics, action.relicId)) return session
       return {
         ...session,
-        run: { ...session.run, relics: [...session.run.relics, action.relicId] },
+        run: {
+          ...session.run,
+          relics: [...session.run.relics, createRelicInstance(action.relicId)],
+        },
       }
     }
 
@@ -454,7 +543,7 @@ export function sessionReducer(
         ...session,
         run: {
           ...session.run,
-          relics: session.run.relics.filter((id) => id !== action.relicId),
+          relics: session.run.relics.filter((r) => r.defId !== action.relicId),
         },
       }
     }

@@ -8,17 +8,18 @@ export const ACT1_ENEMIES: EnemyDef[] = [
     maxHp: 48,
     intents: [
       { kind: 'buff', value: 2, power: 'strength' },
-      { kind: 'attack', value: 6 },
-      { kind: 'attack', value: 6 },
+      { kind: 'attack', value: 6, attackTag: 'fire' },
+      { kind: 'attack', value: 6, attackTag: 'pearl' },
     ],
   },
   {
     id: 'mob_jaw',
     name: 'Gnawing Ghoul',
+    flavor: 'Teeth that never learned to stop when the meal ended.',
     maxHp: 42,
     intents: [
-      { kind: 'attack', value: 7 },
-      { kind: 'attack', value: 11 },
+      { kind: 'attack', value: 7, attackTag: 'madness' },
+      { kind: 'attack', value: 11, attackTag: 'madness' },
       { kind: 'block', value: 8 },
     ],
   },
@@ -28,9 +29,9 @@ export const ACT1_ENEMIES: EnemyDef[] = [
     flavor: 'A piece of the melded horror—guilt that still crawls on borrowed legs.',
     maxHp: 36,
     intents: [
-      { kind: 'attack', value: 5 },
+      { kind: 'attack', value: 5, attackTag: 'madness' },
       { kind: 'debuff', value: 1, power: 'weak' },
-      { kind: 'attack', value: 8 },
+      { kind: 'attack', value: 8, attackTag: 'madness' },
     ],
   },
   {
@@ -40,7 +41,7 @@ export const ACT1_ENEMIES: EnemyDef[] = [
     maxHp: 40,
     intents: [
       { kind: 'debuff', value: 2, power: 'vulnerable' },
-      { kind: 'attack', value: 9 },
+      { kind: 'attack', value: 9, attackTag: 'madness' },
       { kind: 'block', value: 6 },
     ],
   },
@@ -50,9 +51,9 @@ export const ACT1_ENEMIES: EnemyDef[] = [
     flavor: 'A splinter of the Unbound—freedom with nothing left but appetite.',
     maxHp: 44,
     intents: [
-      { kind: 'attack', value: 8 },
-      { kind: 'attack', value: 4 },
-      { kind: 'attack', value: 4 },
+      { kind: 'attack', value: 8, attackTag: 'chaos' },
+      { kind: 'attack', value: 4, attackTag: 'chaos' },
+      { kind: 'attack', value: 4, attackTag: 'chaos' },
     ],
   },
   {
@@ -62,7 +63,7 @@ export const ACT1_ENEMIES: EnemyDef[] = [
     maxHp: 52,
     intents: [
       { kind: 'block', value: 10 },
-      { kind: 'attack', value: 10 },
+      { kind: 'attack', value: 10, attackTag: 'pearl' },
       { kind: 'buff', value: 1, power: 'strength' },
     ],
   },
@@ -74,7 +75,7 @@ export const ACT1_ENEMIES: EnemyDef[] = [
     intents: [
       { kind: 'attack', value: 6 },
       { kind: 'debuff', value: 1, power: 'weak' },
-      { kind: 'attack', value: 12 },
+      { kind: 'attack', value: 12, attackTag: 'chaos' },
     ],
   },
   {
@@ -83,9 +84,9 @@ export const ACT1_ENEMIES: EnemyDef[] = [
     flavor: 'Man-shaped, mask-bound—look too long and your heart stutters.',
     maxHp: 58,
     intents: [
-      { kind: 'attack', value: 9 },
+      { kind: 'attack', value: 9, attackTag: 'pearl' },
       { kind: 'block', value: 12 },
-      { kind: 'attack', value: 14 },
+      { kind: 'attack', value: 14, attackTag: 'pearl' },
     ],
   },
   {
@@ -95,9 +96,9 @@ export const ACT1_ENEMIES: EnemyDef[] = [
     maxHp: 95,
     intents: [
       { kind: 'block', value: 15 },
-      { kind: 'attack', value: 12 },
+      { kind: 'attack', value: 12, attackTag: 'chaos' },
       { kind: 'debuff', value: 2, power: 'vulnerable' },
-      { kind: 'attack', value: 18 },
+      { kind: 'attack', value: 18, attackTag: 'chaos' },
     ],
   },
   {
@@ -108,9 +109,9 @@ export const ACT1_ENEMIES: EnemyDef[] = [
     maxHp: 88,
     intents: [
       { kind: 'buff', value: 2, power: 'strength' },
-      { kind: 'attack', value: 10 },
+      { kind: 'attack', value: 10, attackTag: 'pearl' },
       { kind: 'block', value: 12 },
-      { kind: 'attack', value: 16 },
+      { kind: 'attack', value: 16, attackTag: 'madness' },
     ],
   },
   {
@@ -120,11 +121,11 @@ export const ACT1_ENEMIES: EnemyDef[] = [
     flavor: 'Ice and silence; the sky’s scale-legends ended here.',
     maxHp: 140,
     intents: [
-      { kind: 'attack', value: 10 },
+      { kind: 'attack', value: 10, attackTag: 'cold' },
       { kind: 'debuff', value: 2, power: 'weak' },
-      { kind: 'attack', value: 16 },
+      { kind: 'attack', value: 16, attackTag: 'cold' },
       { kind: 'buff', value: 2, power: 'strength' },
-      { kind: 'attack', value: 22 },
+      { kind: 'attack', value: 22, attackTag: 'cold' },
     ],
   },
   {
@@ -135,10 +136,10 @@ export const ACT1_ENEMIES: EnemyDef[] = [
     maxHp: 180,
     intents: [
       { kind: 'buff', value: 3, power: 'strength' },
-      { kind: 'attack', value: 14 },
-      { kind: 'attack', value: 20 },
+      { kind: 'attack', value: 14, attackTag: 'chaos' },
+      { kind: 'attack', value: 20, attackTag: 'chaos' },
       { kind: 'debuff', value: 2, power: 'vulnerable' },
-      { kind: 'attack', value: 28 },
+      { kind: 'attack', value: 28, attackTag: 'chaos' },
     ],
   },
 ]

@@ -147,9 +147,15 @@ export function executeEnemyTurn(
         case 'attack': {
           let raw = intent.value + getPower(enemy.powers, 'strength')
           raw = Math.floor(raw * weakMultiplier(enemy.powers))
+          const hpBefore = hp
           const result = dealDamageToPlayer(next.playerBlock, hp, raw, next.playerPowers)
           next = { ...next, playerBlock: result.block }
           hp = result.hp
+          if (hp < hpBefore && intent.attackTag) {
+            const tags = new Set(next.survivedHitTags)
+            tags.add(intent.attackTag)
+            next = { ...next, survivedHitTags: [...tags] }
+          }
           break
         }
         case 'block':
@@ -184,6 +190,7 @@ export function executeEnemyTurn(
     energy: next.maxEnergy,
     playerBlock: next.playerBlock,
     playerPowers: next.playerPowers,
+    heroicEffortUsed: false,
   }
 
   if (hp <= 0) {

@@ -55,7 +55,7 @@ export function RunHud({
       <header className={styles.hud}>
         <HpBar hp={run.hp} maxHp={run.maxHp} label="HP" />
         <span className={styles.gold}>{run.gold} gold</span>
-        <RelicBar relicIds={run.relics} />
+        <RelicBar relics={run.relics} />
         {center}
         <div className={styles.right}>
           {showInventory ? (
@@ -77,7 +77,7 @@ export function RunHud({
       {inventoryOpen ? (
         <DeckViewerModal
           deck={run.deck}
-          relicIds={run.relics}
+          relics={run.relics}
           footerNote={inventoryFooterNote}
           onClose={() => setInventoryOpen(false)}
         />

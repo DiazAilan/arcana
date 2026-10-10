@@ -1,21 +1,29 @@
 import { getRegistry } from '../../game/content/registry'
+import { resolveRelicInstance } from '../../game/run/resolveRelic'
+import type { RelicInstance } from '../../game/models/relicInstance'
 import { RelicIcon } from './RelicIcon'
 import { Tooltip } from './Tooltip'
 import styles from './RelicBar.module.scss'
 
-type Props = { relicIds: string[] }
+type Props = { relics: RelicInstance[] }
 
-export function RelicBar({ relicIds }: Props) {
-  if (relicIds.length === 0) return null
+export function RelicBar({ relics }: Props) {
+  if (relics.length === 0) return null
   const registry = getRegistry()
   return (
     <div className={styles.bar}>
-      {relicIds.map((id) => {
-        const relic = registry.relics.get(id)
+      {relics.map((inst) => {
+        const relic = registry.relics.get(inst.defId)
         if (!relic) return null
+        const resolved = resolveRelicInstance(inst)
         return (
-          <Tooltip key={id} title={relic.name} body={relic.description} placement="bottom">
-            <RelicIcon relicId={id} size="sm" />
+          <Tooltip
+            key={inst.instanceId}
+            title={relic.name}
+            body={`${relic.description}${resolved.descriptionSuffix}`}
+            placement="bottom"
+          >
+            <RelicIcon relicId={resolved.artKey} size="sm" />
           </Tooltip>
         )
       })}

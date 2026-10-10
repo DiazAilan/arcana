@@ -14,7 +14,7 @@ import { playSfx } from '../../audio/sfxPlayer'
 import { useGame } from '../../context/GameContext'
 import { getRegistry } from '../../game/content/registry'
 import type { CombatState } from '../../game/combat/combatState'
-import { getCardEffects } from '../../game/combat/applyEffects'
+import { getCardEffectsForInstance, getResolvedCardCost } from '../../game/combat/applyEffects'
 import { cardHasEnemyTargetDamage, previewEnemyHpAfterCard } from '../../game/combat/cardPreview'
 import { previewPlayerHpAfterEnemyTurn } from '../../game/combat/intents'
 import { BlockBadge } from '../components/BlockBadge'
@@ -30,6 +30,8 @@ import { PowerRow } from '../components/PowerRow'
 import { RunHud } from '../components/RunHud'
 import type { EnemyInstance } from '../../game/models/enemy'
 import { expectedAttackDamageToPlayer } from '../combat/expectedPlayerDamage'
+import { heroicEffortHpCost } from '../../game/combat/combatState'
+import { Tooltip } from '../components/Tooltip'
 import styles from './CombatScreen.module.scss'
 
 function isTypingTarget(e: KeyboardEvent): boolean {
@@ -220,7 +222,7 @@ export function CombatScreen() {
     const card = combat.hand[handIndex]
     if (!card || !canPlay) return
     const def = getRegistry().cards.get(card.defId)
-    if (!def || combat.energy < def.cost) return
+    if (!def || combat.energy < getResolvedCardCost(card)) return
     lastPlayedCardRef.current = card.defId
     if (card.defId === 'arc_bash') {
       playCardBashSfx()
@@ -232,7 +234,7 @@ export function CombatScreen() {
   }
 
   const draggedCard = draggingIndex != null ? combat.hand[draggingIndex] : null
-  const draggedEffects = draggedCard ? getCardEffects(draggedCard.defId, draggedCard.upgraded) : []
+  const draggedEffects = draggedCard ? getCardEffectsForInstance(draggedCard) : []
   const showHpGhost =
     draggedCard != null &&
     dragOverEnemy != null &&
@@ -321,6 +323,23 @@ export function CombatScreen() {
               size="combat"
               showTooltip
             />
+            <Tooltip
+              body={`Once per turn: lose HP to gain 1 Energy. Cost rises each time you push this fight (${combat.heroicEffortUsesThisCombat} used).`}
+              placement="top"
+            >
+              <button
+                type="button"
+                className={styles.heroicEffortBtn}
+                disabled={
+                  !canPlay ||
+                  combat.heroicEffortUsed ||
+                  run.hp <= heroicEffortHpCost(combat.heroicEffortUsesThisCombat)
+                }
+                onClick={() => dispatch({ type: 'COMBAT', action: { type: 'HEROIC_EFFORT' } })}
+              >
+                Push yourself (−{heroicEffortHpCost(combat.heroicEffortUsesThisCombat)} HP)
+              </button>
+            </Tooltip>
           </div>
         </div>
 

@@ -31,7 +31,7 @@ export const ACT1_CARDS: CardDef[] = [
   defend,
   {
     id: 'arc_bash',
-    name: 'Tomb Bash',
+    name: 'Bash',
     type: 'attack',
     cost: 2,
     description: 'Deal 8 damage. Apply 2 Vulnerable.',

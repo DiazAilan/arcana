@@ -49,6 +49,31 @@ export function formatRunEffectOutcomes(
         lines.push(name ? `Removed ${name} from your deck.` : 'Removed a card from your deck.')
         break
       }
+      case 'set_flag':
+        break
+      case 'max_hp_delta':
+        if (effect.amount > 0) lines.push(`Max HP increased by ${effect.amount}.`)
+        else if (effect.amount < 0) lines.push(`Max HP decreased by ${-effect.amount}.`)
+        break
+      case 'add_influence_random_card':
+      case 'add_influence_card': {
+        const inf = registry.influences.get(effect.influenceId)
+        lines.push(`Something marks your deck: ${inf?.name ?? 'Influence'}.`)
+        break
+      }
+      case 'add_influence_random_relic':
+      case 'add_influence_relic': {
+        const inf = registry.influences.get(effect.influenceId)
+        lines.push(`${inf?.name ?? 'Influence'} settles on a relic.`)
+        break
+      }
+      case 'purify_random_bane_card':
+      case 'purify_card':
+        lines.push('A bane influence washes away.')
+        break
+      case 'purify_relic':
+        lines.push('A relic sheds a bane influence.')
+        break
       default:
         break
     }

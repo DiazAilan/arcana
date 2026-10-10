@@ -24,4 +24,6 @@ export type RelicDef = {
   isHeart?: boolean
   /** Internal domain tag for balance/content (not shown in UI) */
   heartDomain?: 'creation' | 'chaos' | 'madness' | 'life' | 'passion' | 'still'
+  /** Can gain Influences from events, combat, or shop services. Hearts default true. */
+  influenceEligible?: boolean
 }

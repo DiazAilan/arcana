@@ -13,7 +13,7 @@ export function groupDeck(deck: CardInstance[]): DeckGroup[] {
   const map = new Map<string, DeckGroup>()
 
   for (const card of deck) {
-    const key = `${card.defId}:${card.upgraded ? '1' : '0'}`
+    const key = `${card.defId}:${card.upgraded ? '1' : '0'}:${card.influences.join(',')}`
     const existing = map.get(key)
     if (existing) {
       existing.count += 1

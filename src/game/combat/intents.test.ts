@@ -16,6 +16,9 @@ function minimalCombat(enemies: EnemyInstance[], overrides: Partial<CombatState>
     discardPile: [],
     exhaustPile: [],
     enemies,
+    heroicEffortUsed: false,
+    heroicEffortUsesThisCombat: 0,
+    survivedHitTags: [],
     ...overrides,
   }
 }

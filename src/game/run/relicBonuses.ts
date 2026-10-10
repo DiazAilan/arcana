@@ -1,36 +1,25 @@
 import { getRegistry } from '../content/registry'
+import type { RelicInstance } from '../models/relicInstance'
+import { aggregateRelicStats } from './resolveRelic'
 
-export function getMaxEnergyFromRelics(relicIds: string[], base = 3): number {
-  let max = base
-  const registry = getRegistry()
-  for (const id of relicIds) {
-    const relic = registry.relics.get(id)
-    if (relic?.energyBonus) max += relic.energyBonus
-  }
-  return max
+export function getMaxEnergyFromRelics(relics: RelicInstance[], base = 3): number {
+  return base + aggregateRelicStats(relics).energyBonus
 }
 
-export function getVictoryHealFromRelics(relicIds: string[]): number {
-  let heal = 0
-  const registry = getRegistry()
-  for (const id of relicIds) {
-    const relic = registry.relics.get(id)
-    if (relic?.victoryHeal) heal += relic.victoryHeal
-  }
-  return heal
+export function getVictoryHealFromRelics(relics: RelicInstance[]): number {
+  return aggregateRelicStats(relics).victoryHeal
 }
 
-export function getFloorGoldFromRelics(relicIds: string[]): number {
+export function getFloorGoldFromRelics(relics: RelicInstance[]): number {
   let total = 0
   const registry = getRegistry()
-  for (const id of relicIds) {
-    const relic = registry.relics.get(id)
-    if (relic?.floorGold) total += relic.floorGold
+  for (const relic of relics) {
+    const def = registry.relics.get(relic.defId)
+    if (def?.floorGold) total += def.floorGold
   }
   return total
 }
 
-export function getCombatStartBlock(relicIds: string[]): number {
-  if (relicIds.includes('relic_sigil')) return 4
-  return 0
+export function getCombatStartBlock(relics: RelicInstance[]): number {
+  return aggregateRelicStats(relics).combatStartBlock
 }

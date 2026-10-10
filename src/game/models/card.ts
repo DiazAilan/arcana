@@ -20,13 +20,19 @@ export type CardInstance = {
   instanceId: string
   defId: string
   upgraded: boolean
+  /** Influence def ids (max 2, append-only until purified). */
+  influences: string[]
 }
 
 let cardInstanceCounter = 0
 
-export function createCardInstance(defId: string, upgraded = false): CardInstance {
+export function createCardInstance(
+  defId: string,
+  upgraded = false,
+  influences: string[] = [],
+): CardInstance {
   cardInstanceCounter += 1
-  return { instanceId: `c-${cardInstanceCounter}`, defId, upgraded }
+  return { instanceId: `c-${cardInstanceCounter}`, defId, upgraded, influences: [...influences] }
 }
 
 export function resetCardInstanceCounter(): void {

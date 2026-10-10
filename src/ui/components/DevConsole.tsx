@@ -81,7 +81,7 @@ export function DevConsole() {
         append('err', `Unknown relic: ${command.relicId}`)
         return
       }
-      if (session.run.relics.includes(command.relicId)) {
+      if (session.run.relics.some((r) => r.defId === command.relicId)) {
         append('err', 'Relic already owned.')
         return
       }
@@ -91,7 +91,7 @@ export function DevConsole() {
     }
 
     if (command.kind === 'relic_delete') {
-      if (!session.run.relics.includes(command.relicId)) {
+      if (!session.run.relics.some((r) => r.defId === command.relicId)) {
         append('err', 'Relic not in inventory.')
         return
       }

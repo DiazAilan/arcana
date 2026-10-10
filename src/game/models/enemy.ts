@@ -1,4 +1,5 @@
 import type { PowerKind } from './effects'
+import type { AttackTag } from './influence'
 
 export type IntentKind = 'attack' | 'block' | 'buff' | 'debuff'
 
@@ -7,6 +8,8 @@ export type IntentDef = {
   /** Attack damage, block amount, or power stacks */
   value: number
   power?: PowerKind
+  /** Internal tag when this attack hits the player (Influence triggers). */
+  attackTag?: AttackTag
 }
 
 export type EnemyDef = {

@@ -1,10 +1,10 @@
-import type { CombatEffect } from '../models/effects'
+import type { CombatEffect, PowerKind } from '../models/effects'
 import type { EnemyInstance } from '../models/enemy'
 import type { CombatState } from './combatState'
 import { dealDamageToEnemy } from './damage'
 import { getPower, vulnerableMultiplier, weakMultiplier } from './powers'
 
-export type CardStatKind = 'damage' | 'block' | 'heal'
+export type CardStatKind = 'damage' | 'block' | 'heal' | 'power' | 'energy' | 'draw'
 
 export type CardStatPreview = {
   kind: CardStatKind
@@ -29,6 +29,13 @@ const STAT_META: Record<CardStatKind, { label: string; symbol: string }> = {
   damage: { label: 'Damage', symbol: '⚔' },
   block: { label: 'Block', symbol: '🛡' },
   heal: { label: 'Heal', symbol: '♥' },
+  power: { label: 'Power', symbol: '✦' },
+  energy: { label: 'Energy', symbol: '⚡' },
+  draw: { label: 'Draw', symbol: '🃏' },
+}
+
+export type CardEffectStat = CardBaseStat & {
+  power?: PowerKind
 }
 
 export function outgoingDamageRaw(state: Pick<CombatState, 'playerPowers'>, base: number): number {
@@ -108,8 +115,20 @@ export function getCardStatPreviews(
   return out
 }
 
+const POWER_LABEL: Record<PowerKind, string> = {
+  strength: 'Strength',
+  dexterity: 'Dexterity',
+  metallicize: 'Metallicize',
+  vulnerable: 'Vulnerable',
+  weak: 'Weak',
+}
+
 export function getCardBaseStats(effects: CombatEffect[]): CardBaseStat[] {
-  const out: CardBaseStat[] = []
+  return getCardEffectStats(effects)
+}
+
+export function getCardEffectStats(effects: CombatEffect[]): CardEffectStat[] {
+  const out: CardEffectStat[] = []
   for (const effect of effects) {
     switch (effect.type) {
       case 'damage':
@@ -121,6 +140,21 @@ export function getCardBaseStats(effects: CombatEffect[]): CardBaseStat[] {
         break
       case 'heal':
         out.push({ kind: 'heal', value: effect.amount, ...STAT_META.heal })
+        break
+      case 'apply_power':
+        out.push({
+          kind: 'power',
+          value: effect.amount,
+          power: effect.power,
+          label: POWER_LABEL[effect.power],
+          symbol: STAT_META.power.symbol,
+        })
+        break
+      case 'gain_energy':
+        out.push({ kind: 'energy', value: effect.amount, ...STAT_META.energy })
+        break
+      case 'draw':
+        out.push({ kind: 'draw', value: effect.amount, ...STAT_META.draw })
         break
       default:
         break
