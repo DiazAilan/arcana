@@ -115,16 +115,6 @@ export function descriptionWithBaseStats(description: string, stats: CardBaseSta
   return parts
 }
 
-function baseStatValueAt(stats: CardBaseStat[], kind: CardBaseStat['kind'], index: number): number | undefined {
-  let seen = 0
-  for (const stat of stats) {
-    if (stat.kind !== kind) continue
-    if (seen === index) return stat.value
-    seen += 1
-  }
-  return undefined
-}
-
 function statMatchKey(stat: CardEffectStat): string {
   if (stat.kind === 'power' && stat.power) return `power:${stat.power}`
   return stat.kind
